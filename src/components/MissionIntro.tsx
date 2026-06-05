@@ -46,6 +46,14 @@ export default function MissionIntro({ onComplete }: MissionIntroProps) {
     return () => clearTimeout(timer);
   }, [phase]);
 
+  const agataLines: Record<'intro' | 'form' | 'welcome', string> = {
+    intro:
+      'Soy Ágata, tu guía. Te acompañaré en cada paso del museo: desde aquí hasta la última marca.',
+    form: 'Regístrate para guardar tu progreso y las frases clave que vayas descubriendo.',
+    welcome:
+      '¡Perfecto! En el museo pulsa el pilar donde quieras empezar. Yo estaré contigo en cada pantalla.',
+  };
+
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     const newErrors: { name?: string; email?: string } = {};
@@ -68,6 +76,30 @@ export default function MissionIntro({ onComplete }: MissionIntroProps) {
     <div className="fi-screen fi-screen--mission">
       <div className="fi-mission-bg" />
 
+      <div className="fi-mission-layout">
+        <aside className="fi-mission-agata" aria-label="Ágata, guía de la misión">
+          <img
+            className="fi-mission-agata-img"
+            src="/assets/characters/agata-idle.png"
+            alt=""
+            width={128}
+            height={128}
+          />
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={phase}
+              className="fi-mission-agata-bubble"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+            >
+              {agataLines[phase]}
+            </motion.p>
+          </AnimatePresence>
+        </aside>
+
+        <div className="fi-mission-main">
       <AnimatePresence mode="wait">
         {phase === 'intro' && (
           <motion.div
@@ -226,6 +258,8 @@ export default function MissionIntro({ onComplete }: MissionIntroProps) {
           </motion.div>
         )}
       </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,16 +1,13 @@
 import Phaser from 'phaser';
-import { Player } from '../entities/Player';
 import { AgataGuide } from '../entities/AgataGuide';
 import { EventBus } from '../EventBus';
 import { pillars, type PillarData, type Brand } from '../../data/brandData';
 import { getSafeZones, getPillarStationPositions } from '../utils/layout';
 
 export class PillarScene extends Phaser.Scene {
-  private player!: Player;
   private agata: AgataGuide | null = null;
   private pillarData!: PillarData;
   private stations: Phaser.GameObjects.Container[] = [];
-  private hintText: Phaser.GameObjects.Text | null = null;
   private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
   private decor: Phaser.GameObjects.GameObject[] = [];
 
@@ -33,8 +30,6 @@ export class PillarScene extends Phaser.Scene {
 
     this.createDecor(zones);
     this.createStations();
-    this.createPlayer(zones.isCoarsePointer);
-    this.createHint(zones.isCoarsePointer);
     this.createBackButton(zones);
 
     this.agata = new AgataGuide(this);
@@ -45,7 +40,6 @@ export class PillarScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('#0a1428');
     this.cameras.main.fadeIn(500, 0, 0, 0);
-    this.player.onInteract(() => this.handleInteract());
     this.scale.on('resize', this.onResize, this);
 
     EventBus.emit('current-scene-ready', this);
@@ -72,6 +66,21 @@ export class PillarScene extends Phaser.Scene {
       title.setOrigin(0.5, 0);
       title.setAlpha(0.65);
       this.decor.push(title);
+    }
+
+    if (!zones.isMobile) {
+      const hint = this.add.text(
+        this.playBounds.centerX,
+        this.playBounds.y - 6,
+        'Toca una marca para entrar en su historia',
+        {
+          fontSize: '12px',
+          fontFamily: 'Montserrat, system-ui, sans-serif',
+          color: '#666666',
+        },
+      );
+      hint.setOrigin(0.5, 1);
+      this.decor.push(hint);
     }
   }
 
@@ -104,6 +113,22 @@ export class PillarScene extends Phaser.Scene {
       station.setSize(80, 100);
       this.stations.push(station);
 
+      const hitbox = this.add.circle(0, 0, 44, 0x000000, 0);
+      hitbox.setInteractive({ useHandCursor: true });
+      hitbox.on('pointerdown', () => {
+        if (this.agata?.isDialogueBlocking()) return;
+        this.enterRoom(brand);
+      });
+      hitbox.on('pointerover', () => {
+        this.tweens.add({
+          targets: glow,
+          scale: 1.2,
+          duration: 120,
+          yoyo: true,
+        });
+      });
+      station.add(hitbox);
+
       this.tweens.add({
         targets: glow,
         scale: 1.15,
@@ -114,31 +139,6 @@ export class PillarScene extends Phaser.Scene {
         ease: 'Sine.easeInOut',
       });
     });
-  }
-
-  private createPlayer(isCoarsePointer: boolean): void {
-    const x = this.playBounds.x + this.playBounds.width * 0.5;
-    const y = Math.min(this.scale.height * 0.82, this.playBounds.bottom - 28);
-    this.player = new Player(this, x, y);
-    void isCoarsePointer;
-  }
-
-  private interactLabel = 'Explorar (E)';
-
-  private createHint(isCoarsePointer: boolean): void {
-    this.interactLabel = isCoarsePointer ? 'Toca la marca' : 'Explorar (E)';
-    this.hintText = this.add
-      .text(0, 0, '', {
-        fontSize: '14px',
-        fontFamily: 'Montserrat, system-ui, sans-serif',
-        color: '#ffffff',
-        fontStyle: 'bold',
-        backgroundColor: '#00000099',
-        padding: { x: 12, y: 6 },
-      })
-      .setOrigin(0.5, 1)
-      .setDepth(60)
-      .setVisible(false);
   }
 
   private createBackButton(zones: ReturnType<typeof getSafeZones>): void {
@@ -169,17 +169,6 @@ export class PillarScene extends Phaser.Scene {
     });
   };
 
-  private handleInteract(): void {
-    if (this.agata?.isDialogueBlocking()) return;
-    const pos = this.player.getPosition();
-    for (const station of this.stations) {
-      if (Phaser.Math.Distance.Between(pos.x, pos.y, station.x, station.y) < 88) {
-        this.enterRoom(station.getData('brand') as Brand);
-        return;
-      }
-    }
-  }
-
   private enterRoom(brand: Brand): void {
     EventBus.emit('dialogue-finished');
     this.cameras.main.fadeOut(400, 0, 0, 0);
@@ -194,31 +183,6 @@ export class PillarScene extends Phaser.Scene {
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('HubScene');
     });
-  }
-
-  update(_time: number, delta: number): void {
-    this.player.update(delta, this.playBounds);
-
-    if (this.agata?.isDialogueBlocking() || !this.hintText) {
-      this.hintText?.setVisible(false);
-      return;
-    }
-    let near: Phaser.GameObjects.Container | null = null;
-    const pos = this.player.getPosition();
-    for (const station of this.stations) {
-      if (Phaser.Math.Distance.Between(pos.x, pos.y, station.x, station.y) < 88) {
-        near = station;
-        break;
-      }
-    }
-    if (near) {
-      const brand = near.getData('brand') as Brand;
-      this.hintText.setText(`${this.interactLabel}: ${brand.name}`);
-      this.hintText.setPosition(near.x, near.y - 72);
-      this.hintText.setVisible(true);
-    } else {
-      this.hintText.setVisible(false);
-    }
   }
 
   shutdown(): void {

@@ -32,13 +32,22 @@ export function saveProgress(progress: GameProgress): void {
  *
  * @returns Estado persistido o `null` si no existe o es inválido.
  */
+function migratePillarIds(progress: GameProgress): GameProgress {
+  const mapId = (id: string): string => (id === 'fidelizacion' ? 'comunidad' : id);
+  return {
+    ...progress,
+    pillarsCompleted: progress.pillarsCompleted.map(mapId),
+    currentPillar: progress.currentPillar ? mapId(progress.currentPillar) : null,
+  };
+}
+
 export function loadProgress(): GameProgress | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (!isValidProgress(parsed)) return null;
-    return parsed;
+    return migratePillarIds(parsed);
   } catch {
     return null;
   }

@@ -7,7 +7,9 @@ import {
   type SafeZones,
 } from '../utils/layout';
 import type { BrandDialogue, DialogueNode } from '../../data/dialogueData';
-import { hubIntroDialogue, brandDialogues } from '../../data/dialogueData';
+import { hubIntroDialogue } from '../../data/dialogueData';
+import { findBrandById } from '../../data/brandData';
+import { buildBrandDialogue } from '../../data/buildBrandDialogue';
 
 export type AgataAnimState = 'idle' | 'jump' | 'talk';
 
@@ -25,6 +27,7 @@ export class AgataGuide {
   private jumpTween: Phaser.Tweens.Tween | null = null;
   private activeDialogue: BrandDialogue | null = null;
   private currentNodeId: string | null = null;
+  private activeBrandId: string | null = null;
   private visible = false;
 
   constructor(scene: Phaser.Scene) {
@@ -90,9 +93,10 @@ export class AgataGuide {
     this.playState('idle');
   }
 
-  public playDialogue(dialogue: BrandDialogue): void {
+  public playDialogue(dialogue: BrandDialogue, brandId?: string): void {
     this.showCharacter();
     this.activeDialogue = dialogue;
+    this.activeBrandId = brandId ?? null;
     this.showNode(dialogue.startNodeId);
   }
 
@@ -104,6 +108,13 @@ export class AgataGuide {
       return;
     }
     this.currentNodeId = nodeId;
+
+    if (node.onComplete === 'frase-clave-collected' && this.activeBrandId) {
+      const brand = findBrandById(this.activeBrandId);
+      if (brand) {
+        EventBus.emit('frase-clave-collected', brand.result.fraseClave);
+      }
+    }
 
     const anchor = this.getBubbleAnchor();
     this.bubble.show(node, anchor.x, anchor.y, anchor.maxWidth, {
@@ -139,6 +150,7 @@ export class AgataGuide {
     this.bubble.hide();
     this.activeDialogue = null;
     this.currentNodeId = null;
+    this.activeBrandId = null;
     this.playState('idle');
     EventBus.emit('dialogue-finished');
   }
@@ -230,7 +242,7 @@ export class AgataGuide {
         start: {
           id: 'start',
           speaker: 'agata',
-          text: `¡Bienvenida al pilar de ${pillarName}! Acércate a una marca y pulsa E o tócala.`,
+          text: `¡Bienvenida al pilar de ${pillarName}! Toca una marca para entrar en su historia.`,
           nextId: 'end',
         },
         end: {
@@ -245,21 +257,22 @@ export class AgataGuide {
   };
 
   private onBrandDialogue = (brandId: string): void => {
-    const d = brandDialogues[brandId];
-    if (d) this.playDialogue(d);
-    else {
-      this.playDialogue({
-        startNodeId: 'start',
-        nodes: {
-          start: {
-            id: 'start',
-            speaker: 'agata',
-            text: 'Próximamente más secretos de esta marca…',
-            options: [{ text: 'Volver', nextId: 'exit' }],
-          },
-        },
-      });
+    const brand = findBrandById(brandId);
+    if (brand) {
+      this.playDialogue(buildBrandDialogue(brand), brandId);
+      return;
     }
+    this.playDialogue({
+      startNodeId: 'start',
+      nodes: {
+        start: {
+          id: 'start',
+          speaker: 'agata',
+          text: 'Próximamente más secretos de esta marca…',
+          options: [{ text: 'Volver', nextId: 'exit' }],
+        },
+      },
+    });
   };
 
   public destroy(): void {

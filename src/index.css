@@ -1161,6 +1161,69 @@
   overflow: hidden;
 }
 
+.fi-mission-layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
+  max-width: 960px;
+}
+
+@media (min-width: 720px) {
+  .fi-mission-layout {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 32px;
+  }
+}
+
+.fi-mission-agata {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+@media (min-width: 720px) {
+  .fi-mission-agata {
+    width: 220px;
+    margin: 0;
+    align-items: flex-start;
+  }
+}
+
+.fi-mission-agata-img {
+  width: clamp(96px, 22vw, 140px);
+  height: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 8px 24px rgba(246, 160, 0, 0.25));
+}
+
+.fi-mission-agata-bubble {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e8e8f0;
+  background: rgba(10, 10, 30, 0.92);
+  border: 1px solid rgba(246, 160, 0, 0.35);
+  border-radius: 12px 12px 12px 4px;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.fi-mission-main {
+  flex: 1;
+  min-width: 0;
+}
+
 .fi-mission-bg {
   position: absolute;
   inset: 0;

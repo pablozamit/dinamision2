@@ -1,12 +1,10 @@
 import Phaser from 'phaser';
-import { Player } from '../entities/Player';
 import { AgataGuide } from '../entities/AgataGuide';
 import { EventBus } from '../EventBus';
 import type { Brand } from '../../data/brandData';
 import { getSafeZones } from '../utils/layout';
 
 export class RoomScene extends Phaser.Scene {
-  private player!: Player;
   private agata: AgataGuide | null = null;
   private brand!: Brand;
   private pillarId!: string;
@@ -27,7 +25,6 @@ export class RoomScene extends Phaser.Scene {
     this.playBounds = zones.playArea;
 
     this.createRoomDecor(zones);
-    this.createPlayer();
     this.createBackControl(zones);
 
     this.agata = new AgataGuide(this);
@@ -75,12 +72,6 @@ export class RoomScene extends Phaser.Scene {
     }
   }
 
-  private createPlayer(): void {
-    const x = this.playBounds.x + this.playBounds.width * 0.58;
-    const y = Math.min(this.scale.height * 0.8, this.playBounds.bottom - 24);
-    this.player = new Player(this, x, y);
-  }
-
   private createBackControl(zones: ReturnType<typeof getSafeZones>): void {
     const y = zones.hudTop + (zones.isMobile ? 4 : 10);
     const btn = this.add
@@ -125,10 +116,6 @@ export class RoomScene extends Phaser.Scene {
       this.scene.start('PillarScene', { pillarId: this.pillarId });
     });
   };
-
-  update(_time: number, delta: number): void {
-    this.player.update(delta, this.playBounds);
-  }
 
   shutdown(): void {
     EventBus.off('dialogue-finished', this.onDialogueFinished, this);

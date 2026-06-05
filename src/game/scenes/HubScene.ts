@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { Player } from '../entities/Player';
 import { Portal, type PillarId } from '../entities/Portal';
 import { AgataGuide } from '../entities/AgataGuide';
 import { EventBus } from '../EventBus';
@@ -7,14 +6,12 @@ import { getSafeZones, getHubPortalPositions } from '../utils/layout';
 import { PILLAR_ORDER } from '../../data/pillarAssets';
 
 /**
- * Hub del museo: Ágata NPC a la izquierda, portales a la derecha, sin título duplicado en móvil.
+ * Hub del museo: Ágata NPC, portales táctiles (sin avatar jugador).
  */
 export class HubScene extends Phaser.Scene {
-  private player!: Player;
   private portals: Portal[] = [];
   private agata: AgataGuide | null = null;
   private decor: Phaser.GameObjects.GameObject[] = [];
-  private hintText: Phaser.GameObjects.Text | null = null;
   private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
   private introStarted = false;
 
@@ -28,8 +25,6 @@ export class HubScene extends Phaser.Scene {
 
     this.createDecor(zones);
     this.createPortals();
-    this.createPlayer();
-    this.createHint(zones.isCoarsePointer);
 
     this.agata = new AgataGuide(this);
     EventBus.on('lead-capture-complete', this.startIntro, this);
@@ -40,7 +35,6 @@ export class HubScene extends Phaser.Scene {
 
     this.scale.on('resize', this.onResize, this);
     this.events.on('portal-clicked', this.handlePortalClick, this);
-    this.player.onInteract(() => this.handleInteract());
 
     this.cameras.main.setBackgroundColor('#0a0a1e');
     this.cameras.main.fadeIn(500, 0, 0, 0);
@@ -76,7 +70,7 @@ export class HubScene extends Phaser.Scene {
     }
 
     if (!zones.isMobile) {
-      const hint = this.add.text(width / 2, this.playBounds.y - 8, 'Explora los 4 pilares del museo', {
+      const hint = this.add.text(width / 2, this.playBounds.y - 8, 'Pulsa el pilar donde quieras empezar', {
         fontSize: '13px',
         fontFamily: 'Montserrat, system-ui, sans-serif',
         color: '#888888',
@@ -93,38 +87,6 @@ export class HubScene extends Phaser.Scene {
     );
   }
 
-  private createPlayer(): void {
-    const y = Math.min(this.scale.height * 0.78, this.playBounds.bottom - 32);
-    const x = this.playBounds.x + this.playBounds.width * 0.55;
-    this.player = new Player(this, x, y);
-  }
-
-  private createHint(isCoarsePointer: boolean): void {
-    this.hintText = this.add.text(0, 0, '', {
-      fontSize: '15px',
-      fontFamily: 'Montserrat, system-ui, sans-serif',
-      color: '#ffffff',
-      fontStyle: 'bold',
-      backgroundColor: '#00000099',
-      padding: { x: 14, y: 8 },
-    });
-    this.hintText.setOrigin(0.5, 1).setDepth(60).setVisible(false);
-
-    this.events.on('portal-near', (pillarId: PillarId) => {
-      const portal = this.portals.find((p) => p.config.id === pillarId);
-      if (portal && this.hintText) {
-        // En móvil ocultamos el hint para menos desorden visual
-        if (this.scale.width <= 480) return;
-
-        const action = isCoarsePointer ? 'Toca el portal' : 'Entrar (E)';
-        this.hintText.setText(action);
-        this.hintText.setPosition(portal.container.x, portal.container.y - 92);
-        this.hintText.setVisible(true);
-      }
-    });
-    this.events.on('portal-far', () => this.hintText?.setVisible(false));
-  }
-
   private onResize = (): void => {
     const zones = getSafeZones(this.scale);
     this.playBounds = zones.playArea;
@@ -133,23 +95,6 @@ export class HubScene extends Phaser.Scene {
       portal.container.setPosition(positions[i].x, positions[i].y);
     });
   };
-
-  private handleInteract(): void {
-    if (this.agata?.isDialogueBlocking?.()) return;
-    const pos = this.player.getPosition();
-    for (const portal of this.portals) {
-      const distance = Phaser.Math.Distance.Between(
-        pos.x,
-        pos.y,
-        portal.container.x,
-        portal.container.y,
-      );
-      if (distance < 96) {
-        this.enterPortal(portal.config.id);
-        return;
-      }
-    }
-  }
 
   private handlePortalClick(pillarId: PillarId): void {
     if (this.agata?.isDialogueBlocking()) return;
@@ -164,14 +109,6 @@ export class HubScene extends Phaser.Scene {
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('PillarScene', { pillarId });
     });
-  }
-
-  update(_time: number, delta: number): void {
-    this.player.update(delta, this.playBounds);
-    const playerPos = this.player.getPosition();
-    for (const portal of this.portals) {
-      portal.update(playerPos);
-    }
   }
 
   shutdown(): void {

@@ -5,7 +5,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventBus } from '../game/EventBus';
-import { hubIntroDialogue, brandDialogues, type BrandDialogue } from '../data/dialogueData';
+import { hubIntroDialogue, type BrandDialogue } from '../data/dialogueData';
+import { findBrandById } from '../data/brandData';
+import { buildBrandDialogue } from '../data/buildBrandDialogue';
 
 export default function DialogueOverlay() {
   const [activeDialogue, setActiveDialogue] = useState<BrandDialogue | null>(null);
@@ -34,8 +36,9 @@ export default function DialogueOverlay() {
     };
 
     const startBrandDialogue = (brandId: string) => {
-      const dialogue = brandDialogues[brandId];
-      if (dialogue) {
+      const brand = findBrandById(brandId);
+      if (brand) {
+        const dialogue = buildBrandDialogue(brand);
         setActiveDialogue(dialogue);
         setCurrentNodeId(dialogue.startNodeId);
       } else {

@@ -13,7 +13,7 @@ const ICON_BY_PILLAR: Record<PillarId, string> = {
   gamification: '/assets/icons/gamificacion.png',
   acompanamiento: '/assets/icons/acompanamiento.png',
   celebracion: '/assets/icons/celebracion.png',
-  fidelizacion: '/assets/icons/comunidad.png',
+  comunidad: '/assets/icons/comunidad.png',
 };
 
 export const PILLAR_ASSETS: Record<PillarId, PillarAssetConfig> = Object.fromEntries(

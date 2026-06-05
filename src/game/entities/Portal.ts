@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { PILLAR_ASSETS } from '../../data/pillarAssets';
 
-export type PillarId = 'gamification' | 'acompanamiento' | 'celebracion' | 'fidelizacion';
+export type PillarId = 'gamification' | 'acompanamiento' | 'celebracion' | 'comunidad';
 
 export interface PortalConfig {
   id: PillarId;
@@ -27,10 +27,7 @@ export class Portal {
   private readonly icon: Phaser.GameObjects.Image;
   private readonly label: Phaser.GameObjects.Text;
   private readonly counter: Phaser.GameObjects.Text;
-  private isNear: boolean = false;
   private pulseTween: Phaser.Tweens.Tween | null = null;
-
-  private static readonly PROXIMITY_RADIUS = 96;
 
   constructor(
     scene: Phaser.Scene,
@@ -146,53 +143,6 @@ export class Portal {
     this.icon.setAlpha(0.45);
     this.label.setColor('#888888');
     this.label.setText(`${this.config.label}\n(Próximamente)`);
-  }
-
-  public update(playerPos: { x: number; y: number }): void {
-    if (this.config.locked) return;
-
-    const distance = Phaser.Math.Distance.Between(
-      playerPos.x,
-      playerPos.y,
-      this.container.x,
-      this.container.y,
-    );
-
-    const wasNear = this.isNear;
-    this.isNear = distance < Portal.PROXIMITY_RADIUS;
-
-    if (this.isNear && !wasNear) {
-      this.onPlayerEnter();
-    } else if (!this.isNear && wasNear) {
-      this.onPlayerExit();
-    }
-  }
-
-  private onPlayerEnter(): void {
-    if (this.pulseTween) this.pulseTween.pause();
-    this.scene.tweens.add({
-      targets: this.outerRing,
-      scaleX: 1.2,
-      scaleY: 1.2,
-      duration: 200,
-      ease: 'Back.easeOut',
-    });
-    this.innerGlow.setAlpha(0.5);
-    this.popHover();
-    this.scene.events.emit('portal-near', this.config.id);
-  }
-
-  private onPlayerExit(): void {
-    this.scene.tweens.add({
-      targets: this.outerRing,
-      scaleX: 1,
-      scaleY: 1,
-      duration: 200,
-      ease: 'Sine.easeOut',
-    });
-    this.innerGlow.setAlpha(0.22);
-    if (this.pulseTween) this.pulseTween.resume();
-    this.scene.events.emit('portal-far', this.config.id);
   }
 
   public setCompleted(completed: number): void {
