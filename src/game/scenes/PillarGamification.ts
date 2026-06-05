@@ -1,8 +1,11 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player';
+import { AgataGuide } from '../entities/AgataGuide';
 import { EventBus } from '../EventBus';
 import { playSound } from '../utils/audio';
 import { gamificationBrands } from '../../data/brandData';
+import { getSafeZones } from '../utils/layout';
+import { pillarGamificationEnterDialogue } from '../../data/agataDialogues';
 
 /**
  * `PillarGamification` - Escena del pilar Gamificación.
@@ -29,6 +32,9 @@ export class PillarGamification extends Phaser.Scene {
   private progressText: Phaser.GameObjects.Text | null = null;
   private completed: boolean = false;
   private hintText: Phaser.GameObjects.Text | null = null;
+  private agata: AgataGuide | null = null;
+  private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
+  private isCoarsePointer = false;
 
   /** Marca del MVP. */
   private static readonly MVP_BRAND_NAME = 'IKEA';
@@ -43,12 +49,23 @@ export class PillarGamification extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    const zones = getSafeZones(this.scale);
+    this.playBounds = zones.playArea;
 
-    this.createBackground(width, height);
+    this.createBackground(width, height, zones.isMobile);
     this.createStation(width, height);
     this.createPlayer(width, height);
     this.createProgressIndicator(width, height);
+    this.isCoarsePointer = zones.isCoarsePointer;
     this.createHint();
+
+    this.agata = new AgataGuide(this);
+    this.time.delayedCall(400, () => {
+      this.agata?.emitAnchorUpdate();
+      EventBus.emit('agata-dialogue-open', { script: pillarGamificationEnterDialogue });
+    });
+
+    this.scale.on('resize', this.onResize, this);
 
     this.cameras.main.setBackgroundColor('#0a1428');
 
@@ -67,9 +84,9 @@ export class PillarGamification extends Phaser.Scene {
   /**
    * Fondo temático de Gamificación: azul profundo + decoración.
    */
-  private createBackground(width: number, height: number): void {
-    // Título del pilar
-    const title = this.add.text(width / 2, 50, 'PILAR 1 · GAMIFICACIÓN', {
+  private createBackground(width: number, height: number, isMobile: boolean): void {
+    const titleY = this.playBounds.y - (isMobile ? 24 : 32);
+    const title = this.add.text(width / 2, titleY, 'PILAR 1 · GAMIFICACIÓN', {
       fontSize: '22px',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       color: '#6ec6ff',
@@ -80,17 +97,22 @@ export class PillarGamification extends Phaser.Scene {
     title.setOrigin(0.5, 0.5);
 
     // Subtítulo
-    const subtitle = this.add.text(width / 2, 80, 'Acércate a la marca y pulsa E', {
+    const subtitle = this.add.text(
+      width / 2,
+      titleY + 28,
+      isMobile ? 'Toca la estación IKEA' : 'Acércate a la marca y pulsa E',
+      {
       fontSize: '13px',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       color: '#aaaaaa',
       stroke: '#000000',
       strokeThickness: 2,
-    });
+      },
+    );
     subtitle.setOrigin(0.5, 0.5);
 
-    // "Monedas" decorativas flotando
-    for (let i = 0; i < 10; i++) {
+    const coinCount = isMobile ? 5 : 10;
+    for (let i = 0; i < coinCount; i++) {
       const x = Phaser.Math.Between(50, width - 50);
       const y = Phaser.Math.Between(150, height - 50);
       const coin = this.add.circle(x, y, 6, 0xf6a000, 0.6);
@@ -112,24 +134,26 @@ export class PillarGamification extends Phaser.Scene {
    */
   private createStation(width: number, height: number): void {
     const cx = width / 2;
-    const cy = height * 0.45;
+    const cy = this.playBounds.y + this.playBounds.height * 0.45;
 
     this.brandStation = this.add.container(cx, cy);
+    this.brandStation.setScale(0);
 
-    // Glow pulsante
-    this.stationGlow = this.add.circle(0, 0, 50, 0x3a7bd5, 0.3);
+    this.stationGlow = this.add.circle(0, 0, 52, 0x3a7bd5, 0.3);
     this.stationGlow.setStrokeStyle(2, 0x6ec6ff, 0.7);
     this.brandStation.add(this.stationGlow);
 
-    // Cuerpo de la estación (rectángulo)
-    const body = this.add.rectangle(0, 0, 80, 80, 0x1a4ba0, 0.8);
-    body.setStrokeStyle(3, 0x6ec6ff, 1);
-    this.brandStation.add(body);
+    const icon = this.add.image(0, 0, 'pillar-icon-gamification');
+    const iconScale = 72 / Math.max(icon.width, icon.height);
+    icon.setScale(iconScale);
+    this.brandStation.add(icon);
 
-    // Icono central (estrella = "premio")
-    const star = this.add.star(0, 0, 5, 14, 24, 0xf6a000, 1);
-    star.setStrokeStyle(2, 0xffd54f, 1);
-    this.brandStation.add(star);
+    this.tweens.add({
+      targets: this.brandStation,
+      scale: 1,
+      duration: 500,
+      ease: 'Back.easeOut',
+    });
 
     // Nombre de la marca
     this.stationName = this.add.text(0, 60, PillarGamification.MVP_BRAND_NAME, {
@@ -161,13 +185,13 @@ export class PillarGamification extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    // Rotación lenta de la estrella
     this.tweens.add({
-      targets: star,
-      angle: 360,
-      duration: 8000,
+      targets: icon,
+      scale: iconScale * 1.06,
+      duration: 1200,
+      yoyo: true,
       repeat: -1,
-      ease: 'Linear',
+      ease: 'Sine.easeInOut',
     });
   }
 
@@ -175,7 +199,8 @@ export class PillarGamification extends Phaser.Scene {
    * Jugador aparece abajo.
    */
   private createPlayer(width: number, height: number): void {
-    this.player = new Player(this, width / 2, height * 0.8);
+    const startY = Math.min(height * 0.82, this.playBounds.bottom - 36);
+    this.player = new Player(this, width / 2, startY);
   }
 
   /**
@@ -214,7 +239,9 @@ export class PillarGamification extends Phaser.Scene {
    */
   private updateProximityHint(nearStation: boolean): void {
     if (nearStation && !this.completed) {
-      this.hintText?.setText('Investigar (E)');
+      this.hintText?.setText(
+        this.isCoarsePointer ? 'Toca para investigar' : 'Investigar (E)',
+      );
       this.hintText?.setPosition(this.brandStation!.x, this.brandStation!.y - 80);
       this.hintText?.setVisible(true);
     } else {
@@ -355,15 +382,20 @@ export class PillarGamification extends Phaser.Scene {
     });
   }
 
+  private onResize = (): void => {
+    this.playBounds = getSafeZones(this.scale).playArea;
+    this.agata?.emitAnchorUpdate();
+  };
+
+  shutdown(): void {
+    this.scale.off('resize', this.onResize, this);
+    this.agata?.destroy();
+    this.agata = null;
+  }
+
   update(_time: number, delta: number): void {
     if (!this.player) return;
-    const bounds = new Phaser.Geom.Rectangle(
-      40,
-      120,
-      this.scale.width - 80,
-      this.scale.height - 180,
-    );
-    this.player.update(delta, bounds);
+    this.player.update(delta, this.playBounds);
 
     // Proximidad a la estación
     if (this.brandStation && !this.completed) {
@@ -375,6 +407,9 @@ export class PillarGamification extends Phaser.Scene {
         this.brandStation.y,
       );
       this.updateProximityHint(dist < 100);
+    }
+    if (this.time.now % 500 < delta) {
+      this.agata?.emitAnchorUpdate();
     }
   }
 }

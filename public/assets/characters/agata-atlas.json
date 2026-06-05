@@ -1,0 +1,120 @@
+{
+  "frames": {
+    "idle_0": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      },
+      "sourceSize": {
+        "w": 520,
+        "h": 720
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      }
+    },
+    "idle_1": {
+      "frame": {
+        "x": 520,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      },
+      "sourceSize": {
+        "w": 520,
+        "h": 720
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      }
+    },
+    "talk": {
+      "frame": {
+        "x": 1040,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      },
+      "sourceSize": {
+        "w": 520,
+        "h": 720
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      }
+    },
+    "point": {
+      "frame": {
+        "x": 1560,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      },
+      "sourceSize": {
+        "w": 520,
+        "h": 720
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      }
+    },
+    "wink": {
+      "frame": {
+        "x": 2080,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      },
+      "sourceSize": {
+        "w": 520,
+        "h": 720
+      },
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 520,
+        "h": 720
+      }
+    }
+  },
+  "meta": {
+    "image": "agata-sheet.png",
+    "size": {
+      "w": 2600,
+      "h": 720
+    },
+    "scale": "1"
+  },
+  "animations": {
+    "agata-idle": [
+      "idle_0",
+      "idle_1"
+    ],
+    "agata-talk": [
+      "talk",
+      "idle_0",
+      "talk",
+      "idle_1"
+    ],
+    "agata-point": [
+      "point"
+    ],
+    "agata-wink": [
+      "wink"
+    ]
+  }
+}

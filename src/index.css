@@ -879,6 +879,64 @@
 /* ============================================
    RESPONSIVE — MOBILE FIRST
    ============================================ */
+@media (max-width: 640px) {
+  .fi-hud-progress {
+    padding: 10px 12px 8px;
+    gap: 8px;
+  }
+
+  .fi-hud-progress-row {
+    gap: 10px;
+  }
+
+  .fi-hud-progress-text {
+    font-size: 10px;
+  }
+
+  .fi-hud-pillars {
+    gap: 6px;
+  }
+
+  .fi-hud-pillar {
+    padding: 6px 8px;
+    min-height: 48px;
+    min-width: 48px;
+    justify-content: center;
+  }
+
+  .fi-hud-pillar-label {
+    display: none;
+  }
+
+  .fi-hud-pillar-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .fi-hud-frases-text {
+    font-size: 11px;
+  }
+
+  .fi-agata-dialogue {
+    top: calc(env(safe-area-inset-top, 0px) + 118px);
+    width: 94vw;
+  }
+
+  .fi-agata-dialogue__text {
+    font-size: 16px;
+  }
+
+  .fi-brand-panel {
+    max-height: 85dvh;
+    margin: 12px;
+  }
+
+  .fi-brand-panel-close {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
 @media (max-width: 480px) {
   .fi-screen {
     padding: 32px 16px;
@@ -1270,9 +1328,91 @@
 .fi-game-stage {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
   background: #0a0a1e;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Ágata dialogue overlay */
+.fi-agata-dialogue {
+  position: absolute;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 132px);
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.fi-agata-dialogue__bubble {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.97);
+  border: 2px solid rgba(112, 88, 147, 0.35);
+  border-radius: 20px;
+  padding: 18px 20px 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.fi-agata-dialogue__name {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #705893;
+  margin-bottom: 8px;
+}
+
+.fi-agata-dialogue__text {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #1a1a2e;
+  margin: 0 0 10px;
+}
+
+.fi-agata-dialogue__hint {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+.fi-agata-dialogue__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fi-agata-dialogue__choice {
+  min-height: 48px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 2px solid rgba(112, 88, 147, 0.4);
+  background: rgba(26, 26, 46, 0.92);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.fi-agata-dialogue__choice:active {
+  transform: scale(0.98);
+}
+
+.fi-agata-dialogue__choice--gold {
+  border-color: #f6a000;
+  background: linear-gradient(135deg, rgba(246, 160, 0, 0.25), rgba(26, 26, 46, 0.95));
 }
 
 .fi-game-stage > #phaser-container,
@@ -1373,6 +1513,13 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
+}
+
+.fi-hud-pillar-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .fi-hud-pillar-label {

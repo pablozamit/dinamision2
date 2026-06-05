@@ -1,84 +1,64 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { Portal, type PillarId } from '../entities/Portal';
+import { AgataGuide } from '../entities/AgataGuide';
 import { EventBus } from '../EventBus';
+import { getSafeZones, getHubPortalPositions } from '../utils/layout';
+import { PILLAR_ORDER } from '../../data/pillarAssets';
+import { hubIntroDialogue } from '../../data/agataDialogues';
 
 /**
- * Posiciones de los 3 portales en el Hub.
- * Calculadas para un viewport típico de 1280x720, escalables.
- */
-const PORTAL_POSITIONS: Record<PillarId, { x: number; y: number }> = {
-  gamification: { x: 0.25, y: 0.45 },
-  acompanamiento: { x: 0.5, y: 0.3 },
-  celebracion: { x: 0.75, y: 0.45 },
-};
-
-/**
- * `HubScene` - El Nodo Digital: vista central del juego.
- *
- * Vista 2D top-down con:
- *  - Fondo abstracto: líneas brillantes + plataformas flotantes procedurales
- *  - Jugador procedural (sprite generado con primitivas)
- *  - 3 portales: Gamificación (azul, funcional), Acompañamiento (verde, bloqueado),
- *    Celebración (dorado, bloqueado)
- *
- * Controles: flechas/WASD + tap-to-move + 'E' para entrar al portal cercano.
+ * `HubScene` - El Nodo Digital con 4 portales e Ágata como guía.
  */
 export class HubScene extends Phaser.Scene {
   private player!: Player;
-  private portals!: Record<PillarId, Portal>;
+  private portals: Portal[] = [];
+  private agata: AgataGuide | null = null;
   private backgroundElements: Phaser.GameObjects.GameObject[] = [];
   private hintText: Phaser.GameObjects.Text | null = null;
+  private titleText: Phaser.GameObjects.Text | null = null;
+  private subtitleText: Phaser.GameObjects.Text | null = null;
+  private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
 
   constructor() {
     super({ key: 'HubScene' });
   }
 
-  /**
-   * Preload: vacío en el MVP (todo es procedural).
-   * Aquí se cargarían assets externos en futuras versiones.
-   */
-  preload(): void {
-    // MVP: 0 assets. Generación procedural.
-  }
-
-  /**
-   * Create: construye el mundo del hub.
-   * Emite 'current-scene-ready' al terminar (regla del proyecto).
-   */
   create(): void {
     const { width, height } = this.scale;
+    const zones = getSafeZones(this.scale);
+    this.playBounds = zones.playArea;
 
-    this.createBackground(width, height);
-    this.createPortals(width, height);
+    this.createBackground(width, height, zones.isMobile);
+    this.createPortals();
     this.createPlayer(width, height);
-    this.createHint();
+    this.createHint(zones.isCoarsePointer);
 
-    // Cámara: fondo oscuro para que resalten los portales
-    this.cameras.main.setBackgroundColor('#0a0a1e');
-
-    // Listeners globales
-    this.events.on('portal-clicked', this.handlePortalClick, this);
-
-    // Click directo en un portal también funciona vía 'E' cuando está cerca
-    this.player.onInteract(() => {
-      this.handleInteract();
+    this.agata = new AgataGuide(this);
+    this.time.delayedCall(300, () => {
+      this.agata?.emitAnchorUpdate();
+      EventBus.emit('agata-dialogue-open', {
+        script: hubIntroDialogue,
+        chainIds: ['welcome', 'choose_path'],
+      });
     });
 
-    // Notificar que la escena está lista (regla del proyecto)
+    this.scale.on('resize', this.onResize, this);
+    this.events.on('portal-clicked', this.handlePortalClick, this);
+
+    this.player.onInteract(() => this.handleInteract());
+
+    this.cameras.main.setBackgroundColor('#0a0a1e');
     EventBus.emit('current-scene-ready', this);
   }
 
-  /**
-   * Crea el fondo abstracto: espacio oscuro con líneas brillantes.
-   */
-  private createBackground(width: number, height: number): void {
+  private createBackground(width: number, height: number, isMobile: boolean): void {
     const cx = width / 2;
+    const decorCount = isMobile ? 3 : 6;
 
-    // "Plataformas flotantes" decorativas (rectángulos con tween)
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < decorCount; i++) {
       const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
+      const y = Phaser.Math.Between(this.playBounds.y, height - 80);
       const w = Phaser.Math.Between(40, 100);
       const h = Phaser.Math.Between(8, 16);
       const platform = this.add.rectangle(x, y, w, h, 0x1a1a3a, 0.4);
@@ -95,95 +75,66 @@ export class HubScene extends Phaser.Scene {
       this.backgroundElements.push(platform);
     }
 
-    // "Líneas de conexión" entre los 3 portales (decorativas)
-    const colors = [0x3a7bd5, 0x4caf50, 0xf6a000];
-    const portalKeys: PillarId[] = ['gamification', 'acompanamiento', 'celebracion'];
-    for (let i = 0; i < portalKeys.length; i++) {
-      const start = PORTAL_POSITIONS[portalKeys[i]];
-      for (let j = i + 1; j < portalKeys.length; j++) {
-        const end = PORTAL_POSITIONS[portalKeys[j]];
-        const sx = start.x * width;
-        const sy = start.y * height;
-        const ex = end.x * width;
-        const ey = end.y * height;
-        const line = this.add.line(0, 0, sx, sy, ex, ey, colors[i], 0.25);
-        line.setLineWidth(1, 1);
-        line.setOrigin(0, 0);
-        this.backgroundElements.push(line);
-      }
-    }
-
-    // Título flotante "EL NODO DIGITAL" arriba
-    const title = this.add.text(cx, 50, 'EL NODO DIGITAL', {
-      fontSize: '22px',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
+    const titleY = this.playBounds.y - (isMobile ? 28 : 36);
+    this.titleText = this.add.text(cx, titleY, 'EL NODO DIGITAL', {
+      fontSize: isMobile ? '18px' : '22px',
+      fontFamily: 'Montserrat, system-ui, sans-serif',
       color: '#ffffff',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,
     });
-    title.setOrigin(0.5, 0.5);
-    this.backgroundElements.push(title);
+    this.titleText.setOrigin(0.5, 0.5);
+    this.backgroundElements.push(this.titleText);
 
-    const subtitle = this.add.text(
-      cx,
-      80,
-      'Acércate a un portal. Pulsa E o haz clic para entrar.',
-      {
-        fontSize: '13px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        color: '#aaaaaa',
-        stroke: '#000000',
-        strokeThickness: 2,
-      },
-    );
-    subtitle.setOrigin(0.5, 0.5);
-    this.backgroundElements.push(subtitle);
+    const zones = getSafeZones(this.scale);
+    const hintLabel = zones.isCoarsePointer
+      ? 'Toca un portal brillante para entrar'
+      : 'Acércate a un portal. Pulsa E o haz clic para entrar.';
+
+    this.subtitleText = this.add.text(cx, titleY + 28, hintLabel, {
+      fontSize: isMobile ? '12px' : '13px',
+      fontFamily: 'Montserrat, system-ui, sans-serif',
+      color: '#aaaaaa',
+      stroke: '#000000',
+      strokeThickness: 2,
+      align: 'center',
+      wordWrap: { width: width - 48 },
+    });
+    this.subtitleText.setOrigin(0.5, 0.5);
+    this.backgroundElements.push(this.subtitleText);
   }
 
-  /**
-   * Instancia los 3 portales.
-   * En el MVP, solo Gamificación es interactivo.
-   */
-  private createPortals(width: number, height: number): void {
-    this.portals = {
-      gamification: new Portal(this, width * PORTAL_POSITIONS.gamification.x, height * PORTAL_POSITIONS.gamification.y, {
-        id: 'gamification',
-        label: 'GAMIFICACIÓN',
-        color: 0x3a7bd5,
-        glowColor: 0x6ec6ff,
-      }),
-      acompanamiento: new Portal(this, width * PORTAL_POSITIONS.acompanamiento.x, height * PORTAL_POSITIONS.acompanamiento.y, {
-        id: 'acompanamiento',
-        label: 'ACOMPAÑAMIENTO',
-        color: 0x4caf50,
-        glowColor: 0x80e27e,
-        locked: true,
-      }),
-      celebracion: new Portal(this, width * PORTAL_POSITIONS.celebracion.x, height * PORTAL_POSITIONS.celebracion.y, {
-        id: 'celebracion',
-        label: 'CELEBRACIÓN',
-        color: 0xf6a000,
-        glowColor: 0xffd54f,
-        locked: true,
-      }),
+  private createPortals(): void {
+    const positions = getHubPortalPositions(this.playBounds);
+    const lockedMap: Record<PillarId, boolean> = {
+      gamification: false,
+      acompanamiento: true,
+      celebracion: true,
+      comunidad: true,
     };
+
+    this.portals = PILLAR_ORDER.map((id, index) =>
+      Portal.fromPillar(
+        this,
+        positions[index].x,
+        positions[index].y,
+        id,
+        lockedMap[id],
+        index * 80,
+      ),
+    );
   }
 
-  /**
-   * Crea el jugador en el centro.
-   */
   private createPlayer(width: number, height: number): void {
-    this.player = new Player(this, width / 2, height * 0.75);
+    const startY = Math.min(height * 0.82, this.playBounds.bottom - 40);
+    this.player = new Player(this, width / 2, startY);
   }
 
-  /**
-   * Texto flotante que muestra "Entrar a X" cuando estás cerca de un portal.
-   */
-  private createHint(): void {
+  private createHint(isCoarsePointer: boolean): void {
     this.hintText = this.add.text(0, 0, '', {
-      fontSize: '18px',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
+      fontSize: '16px',
+      fontFamily: 'Montserrat, system-ui, sans-serif',
       color: '#ffffff',
       fontStyle: 'bold',
       backgroundColor: '#00000088',
@@ -193,10 +144,11 @@ export class HubScene extends Phaser.Scene {
     this.hintText.setVisible(false);
 
     this.events.on('portal-near', (pillarId: PillarId) => {
-      const portal = this.portals[pillarId];
+      const portal = this.portals.find((p) => p.config.id === pillarId);
       if (portal && this.hintText) {
-        this.hintText.setText(`Entrar a ${portal.config.label} (E)`);
-        this.hintText.setPosition(portal.container.x, portal.container.y - 70);
+        const action = isCoarsePointer ? 'Toca' : 'Entrar (E)';
+        this.hintText.setText(`${action} · ${portal.config.label}`);
+        this.hintText.setPosition(portal.container.x, portal.container.y - 88);
         this.hintText.setVisible(true);
       }
     });
@@ -206,12 +158,19 @@ export class HubScene extends Phaser.Scene {
     });
   }
 
-  /**
-   * Handler de 'E' o click directo en el portal cercano.
-   */
+  private onResize = (): void => {
+    const zones = getSafeZones(this.scale);
+    this.playBounds = zones.playArea;
+    const positions = getHubPortalPositions(this.playBounds);
+    this.portals.forEach((portal, i) => {
+      portal.container.setPosition(positions[i].x, positions[i].y);
+    });
+    this.agata?.emitAnchorUpdate();
+  };
+
   private handleInteract(): void {
     const pos = this.player.getPosition();
-    for (const portal of Object.values(this.portals)) {
+    for (const portal of this.portals) {
       if (portal.config.locked) continue;
       const distance = Phaser.Math.Distance.Between(
         pos.x,
@@ -219,50 +178,44 @@ export class HubScene extends Phaser.Scene {
         portal.container.x,
         portal.container.y,
       );
-      if (distance < 90) {
+      if (distance < 96) {
         this.enterPortal(portal.config.id);
         return;
       }
     }
   }
 
-  /**
-   * Click directo en un portal (hitbox invisible).
-   */
   private handlePortalClick(pillarId: PillarId): void {
-    const portal = this.portals[pillarId];
+    const portal = this.portals.find((p) => p.config.id === pillarId);
     if (!portal || portal.config.locked) return;
     this.enterPortal(pillarId);
   }
 
-  /**
-   * Transición a la escena del pilar.
-   */
   private enterPortal(pillarId: PillarId): void {
+    EventBus.emit('agata-dialogue-hide');
     EventBus.emit('portal-entered', pillarId);
     this.cameras.main.fadeOut(400, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       if (pillarId === 'gamification') {
         this.scene.start('PillarGamification');
       }
-      // Acompañamiento y Celebración aún no implementados en MVP
     });
   }
 
-  /**
-   * Update loop: refresca movimiento del jugador y proximidad de portales.
-   */
   update(_time: number, delta: number): void {
-    const bounds = new Phaser.Geom.Rectangle(
-      40,
-      120,
-      this.scale.width - 80,
-      this.scale.height - 180,
-    );
-    this.player.update(delta, bounds);
+    this.player.update(delta, this.playBounds);
     const playerPos = this.player.getPosition();
-    for (const portal of Object.values(this.portals)) {
+    for (const portal of this.portals) {
       portal.update(playerPos);
     }
+    if (this.time.now % 500 < delta) {
+      this.agata?.emitAnchorUpdate();
+    }
+  }
+
+  shutdown(): void {
+    this.scale.off('resize', this.onResize, this);
+    this.agata?.destroy();
+    this.agata = null;
   }
 }

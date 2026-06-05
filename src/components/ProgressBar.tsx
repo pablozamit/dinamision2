@@ -1,25 +1,15 @@
 import { motion } from 'framer-motion';
+import { PILLAR_ASSETS, PILLAR_ORDER } from '../data/pillarAssets';
 
 interface ProgressBarProps {
-  /** Progreso total 0-3 pilares completados. */
   completedPillars: number;
-  /** Total de pilares. */
   totalPillars: number;
-  /** Pilar actualmente activo (para resaltar). */
   currentPillar: string | null;
-  /** Frases clave recogidas hasta ahora. */
   frasesClaveCount: number;
 }
 
 /**
- * `ProgressBar` - HUD superior React sobre el canvas de Phaser.
- *
- * Muestra:
- *  - Progreso total de la misión
- *  - 3 iconos de pilares (se iluminan al completarse)
- *  - Contador de Frases Clave recogidas
- *
- * Es un overlay posicionado absolutamente; no interfiere con el canvas.
+ * `ProgressBar` - HUD superior con iconos de los 4 pilares.
  */
 export default function ProgressBar({
   completedPillars,
@@ -28,12 +18,6 @@ export default function ProgressBar({
   frasesClaveCount,
 }: ProgressBarProps) {
   const percentage = Math.round((completedPillars / totalPillars) * 100);
-
-  const pillars = [
-    { id: 'gamification', label: 'GAM', color: '#3a7bd5' },
-    { id: 'acompanamiento', label: 'ACOMP', color: '#4caf50' },
-    { id: 'celebracion', label: 'CELEB', color: '#f6a000' },
-  ];
 
   return (
     <motion.div
@@ -44,7 +28,7 @@ export default function ProgressBar({
     >
       <div className="fi-hud-progress-row">
         <div className="fi-hud-progress-label">
-          <span className="fi-hud-progress-text">Progreso de la Misión</span>
+          <span className="fi-hud-progress-text">Misión</span>
           <span className="fi-hud-progress-percentage">{percentage}%</span>
         </div>
         <div className="fi-hud-progress-bar">
@@ -58,18 +42,27 @@ export default function ProgressBar({
       </div>
 
       <div className="fi-hud-pillars">
-        {pillars.map((p) => {
-          const isActive = currentPillar === p.id;
+        {PILLAR_ORDER.map((id) => {
+          const p = PILLAR_ASSETS[id];
+          const isActive = currentPillar === id;
           return (
             <motion.div
               key={p.id}
               className={`fi-hud-pillar ${isActive ? 'fi-hud-pillar--active' : ''}`}
-              style={{ borderColor: p.color }}
-              animate={isActive ? { scale: [1, 1.08, 1] } : {}}
+              style={{
+                borderColor: `#${(p.color & 0xffffff).toString(16).padStart(6, '0')}`,
+              }}
+              animate={isActive ? { scale: [1, 1.06, 1] } : {}}
               transition={isActive ? { duration: 1.5, repeat: Infinity } : {}}
             >
-              <span className="fi-hud-pillar-dot" style={{ background: p.color }} />
-              <span className="fi-hud-pillar-label">{p.label}</span>
+              <img
+                src={p.icon}
+                alt={p.label}
+                className="fi-hud-pillar-icon"
+                width={32}
+                height={32}
+              />
+              <span className="fi-hud-pillar-label">{p.label.slice(0, 5)}</span>
             </motion.div>
           );
         })}
@@ -77,7 +70,7 @@ export default function ProgressBar({
 
       <div className="fi-hud-frases">
         <span className="fi-hud-frases-icon">✨</span>
-        <span className="fi-hud-frases-text">{frasesClaveCount} frases recogidas</span>
+        <span className="fi-hud-frases-text">{frasesClaveCount} frases</span>
       </div>
     </motion.div>
   );

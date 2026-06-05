@@ -3,6 +3,7 @@ import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
 import ProgressBar from './components/ProgressBar';
 import BrandPanel from './components/BrandPanel';
+import AgataDialogue from './components/AgataDialogue';
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
 import type { Brand } from './data/brandData';
@@ -95,10 +96,13 @@ export default function App() {
     };
   }, []);
 
-  // Cuando entramos al hub, iniciamos HubScene
+  // Volver al Hub sin reiniciar PreloadScene (assets ya cargados)
   useEffect(() => {
-    if (phase === 'hub' && gameRef.current.scene) {
-      gameRef.current.scene.scene.start('HubScene');
+    const sm = gameRef.current.scene?.scene;
+    if (phase !== 'hub' || !sm) return;
+    if (sm.isActive('PreloadScene')) return;
+    if (!sm.isActive('HubScene')) {
+      sm.start('HubScene');
     }
   }, [phase]);
 
@@ -124,11 +128,12 @@ export default function App() {
           {(phase === 'hub' || phase === 'pillar') && (
             <ProgressBar
               completedPillars={completedPillars}
-              totalPillars={3}
+              totalPillars={4}
               currentPillar={currentPillar}
               frasesClaveCount={progress?.frasesClave.length ?? 0}
             />
           )}
+          <AgataDialogue />
           <BrandPanel brand={activeBrand} onClose={handleCloseBrandPanel} />
         </div>
       )}
