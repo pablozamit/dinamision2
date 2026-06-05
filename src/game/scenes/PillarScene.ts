@@ -4,10 +4,13 @@ import { EventBus } from '../EventBus';
 import { pillars, type PillarData, type Brand } from '../../data/brandData';
 import { getSafeZones, getPillarStationPositions } from '../utils/layout';
 
+const STATION_DEPTH = 40;
+const UI_DEPTH = 200;
+
 export class PillarScene extends Phaser.Scene {
   private agata: AgataGuide | null = null;
   private pillarData!: PillarData;
-  private stations: Phaser.GameObjects.Container[] = [];
+  private stationZones: Phaser.GameObjects.Zone[] = [];
   private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
   private decor: Phaser.GameObjects.GameObject[] = [];
 
@@ -15,8 +18,9 @@ export class PillarScene extends Phaser.Scene {
     super({ key: 'PillarScene' });
   }
 
-  init(data: { pillarId: string }): void {
-    const found = pillars.find((p) => p.id === data.pillarId);
+  init(data: { pillarId?: string }): void {
+    const pillarId = data?.pillarId;
+    const found = pillarId ? pillars.find((p) => p.id === pillarId) : undefined;
     if (!found) {
       this.scene.start('HubScene');
       return;
@@ -25,6 +29,8 @@ export class PillarScene extends Phaser.Scene {
   }
 
   create(): void {
+    if (!this.pillarData) return;
+
     const zones = getSafeZones(this.scale);
     this.playBounds = zones.playArea;
 
@@ -33,8 +39,8 @@ export class PillarScene extends Phaser.Scene {
     this.createBackButton(zones);
 
     this.agata = new AgataGuide(this);
-    this.time.delayedCall(500, () => {
-      this.agata?.showCharacter();
+    this.agata.showCharacter();
+    this.time.delayedCall(350, () => {
       EventBus.emit('start-pillar-intro', this.pillarData.name);
     });
 
@@ -92,13 +98,14 @@ export class PillarScene extends Phaser.Scene {
 
     this.pillarData.brands.forEach((brand, i) => {
       const { x, y } = positions[i];
-      const station = this.add.container(x, y);
 
-      const glow = this.add.circle(0, 0, 42, this.pillarData.color, 0.2);
-      const body = this.add.rectangle(0, 0, 64, 64, 0x1a4ba0, 0.85);
-      body.setStrokeStyle(3, this.pillarData.glowColor, 1);
+      const glow = this.add.circle(x, y, 42, this.pillarData.color, 0.2).setDepth(STATION_DEPTH);
+      const body = this.add
+        .rectangle(x, y, 64, 64, 0x1a4ba0, 0.85)
+        .setStrokeStyle(3, this.pillarData.glowColor, 1)
+        .setDepth(STATION_DEPTH + 1);
       const name = this.add
-        .text(0, 48, brand.name, {
+        .text(x, y + 48, brand.name, {
           fontSize: '13px',
           fontStyle: 'bold',
           color: '#ffffff',
@@ -106,20 +113,15 @@ export class PillarScene extends Phaser.Scene {
           stroke: '#000000',
           strokeThickness: 3,
         })
-        .setOrigin(0.5, 0);
+        .setOrigin(0.5, 0)
+        .setDepth(STATION_DEPTH + 2);
 
-      station.add([glow, body, name]);
-      station.setData('brand', brand);
-      station.setSize(80, 100);
-      this.stations.push(station);
-
-      const hitbox = this.add.circle(0, 0, 44, 0x000000, 0);
-      hitbox.setInteractive({ useHandCursor: true });
-      hitbox.on('pointerdown', () => {
-        if (this.agata?.isDialogueBlocking()) return;
-        this.enterRoom(brand);
-      });
-      hitbox.on('pointerover', () => {
+      const zone = this.add
+        .zone(x, y, 88, 110)
+        .setDepth(STATION_DEPTH + 3)
+        .setInteractive({ useHandCursor: true });
+      zone.on('pointerdown', () => this.onStationClick(brand));
+      zone.on('pointerover', () => {
         this.tweens.add({
           targets: glow,
           scale: 1.2,
@@ -127,7 +129,7 @@ export class PillarScene extends Phaser.Scene {
           yoyo: true,
         });
       });
-      station.add(hitbox);
+      this.stationZones.push(zone);
 
       this.tweens.add({
         targets: glow,
@@ -138,13 +140,22 @@ export class PillarScene extends Phaser.Scene {
         repeat: -1,
         ease: 'Sine.easeInOut',
       });
+
+      zone.setData('brand', brand);
+      zone.setData('visuals', { glow, body, name });
     });
   }
 
+  private onStationClick(brand: Brand): void {
+    this.agata?.forceEndDialogue();
+    this.enterRoom(brand);
+  }
+
   private createBackButton(zones: ReturnType<typeof getSafeZones>): void {
-    const y = zones.hudTop + (zones.isMobile ? 4 : 12);
+    const x = this.playBounds.right - 12;
+    const y = this.playBounds.y + (zones.isMobile ? 6 : 12);
     const backBtn = this.add
-      .text(this.playBounds.right - 8, y, '← Museo', {
+      .text(x, y, '← Museo', {
         fontSize: zones.isMobile ? '13px' : '15px',
         fontFamily: 'Montserrat, system-ui, sans-serif',
         color: '#ffffff',
@@ -152,9 +163,17 @@ export class PillarScene extends Phaser.Scene {
         padding: { x: 10, y: 6 },
       })
       .setOrigin(1, 0)
-      .setDepth(70)
+      .setDepth(UI_DEPTH)
       .setInteractive({ useHandCursor: true });
-    backBtn.on('pointerdown', () => this.returnToHub());
+    backBtn.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, ev?: Event) => {
+      ev?.stopPropagation();
+      this.onBackClick();
+    });
+  }
+
+  private onBackClick(): void {
+    this.agata?.forceEndDialogue();
+    this.returnToHub();
   }
 
   private onResize = (): void => {
@@ -164,8 +183,19 @@ export class PillarScene extends Phaser.Scene {
       this.playBounds,
       this.pillarData.brands.length,
     );
-    this.stations.forEach((station, i) => {
-      station.setPosition(positions[i].x, positions[i].y);
+    this.stationZones.forEach((zone, i) => {
+      const { x, y } = positions[i];
+      zone.setPosition(x, y);
+      const visuals = zone.getData('visuals') as {
+        glow: Phaser.GameObjects.Arc;
+        body: Phaser.GameObjects.Rectangle;
+        name: Phaser.GameObjects.Text;
+      };
+      if (visuals) {
+        visuals.glow.setPosition(x, y);
+        visuals.body.setPosition(x, y);
+        visuals.name.setPosition(x, y + 48);
+      }
     });
   };
 
@@ -187,6 +217,8 @@ export class PillarScene extends Phaser.Scene {
 
   shutdown(): void {
     this.scale.off('resize', this.onResize, this);
+    this.stationZones.forEach((z) => z.destroy());
+    this.stationZones = [];
     this.agata?.destroy();
     this.agata = null;
   }

@@ -144,15 +144,21 @@ export class AgataSpeechBubble {
 
   private layoutAt(anchorX: number, anchorTopY: number): void {
     const isMobile = this.scene.scale.width <= 480;
-    // En móvil, la burbuja se desplaza un poco a la derecha para que el "pico"
-    // coincida mejor con Ágata que está a la izquierda.
-    let x = anchorX - this.bubbleW * (isMobile ? 0.15 : 0.2);
     const margin = 8;
+
+    if (isMobile) {
+      const x = Phaser.Math.Clamp(
+        anchorX - this.bubbleW / 2,
+        margin,
+        this.scene.scale.width - this.bubbleW - margin,
+      );
+      this.container.setPosition(x, anchorTopY);
+      return;
+    }
+
+    let x = anchorX - this.bubbleW * 0.2;
     x = Phaser.Math.Clamp(x, margin, this.scene.scale.width - this.bubbleW - margin);
-
-    // Anclaje vertical: un poco más de separación para que no parezca que le toca la cara
     const y = anchorTopY - this.bubbleH - 10;
-
     this.container.setPosition(x, y);
   }
 

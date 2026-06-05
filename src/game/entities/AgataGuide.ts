@@ -73,24 +73,28 @@ export class AgataGuide {
   }
 
   public showCharacter(): void {
-    if (this.visible) return;
-    this.visible = true;
     this.applyLayout();
-
-    const targetY = this.root.y;
-    this.root.y += 20; // Start slightly lower
-
-    this.scene.tweens.add({
-      targets: this.root,
-      alpha: 1,
-      y: targetY,
-      duration: 600,
-      ease: 'Cubic.easeOut',
-      onComplete: () => {
-          // No auto-jump to keep it clean, or very subtle
-      }
-    });
+    if (!this.visible) {
+      this.visible = true;
+      const targetY = this.root.y;
+      this.root.y += 20;
+      this.root.setAlpha(0);
+      this.scene.tweens.add({
+        targets: this.root,
+        alpha: 1,
+        y: targetY,
+        duration: 400,
+        ease: 'Cubic.easeOut',
+      });
+    } else {
+      this.root.setAlpha(1);
+    }
     this.playState('idle');
+  }
+
+  /** Cierra el diálogo activo para permitir navegación (portales, marcas, volver). */
+  public forceEndDialogue(): void {
+    if (this.activeDialogue) this.endDialogue();
   }
 
   public playDialogue(dialogue: BrandDialogue, brandId?: string): void {
@@ -218,8 +222,15 @@ export class AgataGuide {
 
   private getBubbleAnchor(): { x: number; y: number; maxWidth: number } {
     const pos = getAgataNpcPosition(this.scene.scale, this.zones);
-    // Anclaje justo encima de la cabeza
-    const headY = this.root.y - (this.sprite.displayHeight) - 5;
+    // En móvil la burbuja va arriba del área de juego para no tapar a Ágata ni los portales/marcas
+    if (this.zones.isMobile) {
+      return {
+        x: this.scene.scale.width / 2,
+        y: this.zones.playArea.y + 8,
+        maxWidth: this.scene.scale.width * 0.92,
+      };
+    }
+    const headY = this.root.y - this.sprite.displayHeight - 5;
     return {
       x: this.root.x,
       y: headY,

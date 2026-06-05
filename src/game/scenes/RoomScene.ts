@@ -28,8 +28,8 @@ export class RoomScene extends Phaser.Scene {
     this.createBackControl(zones);
 
     this.agata = new AgataGuide(this);
-    this.time.delayedCall(600, () => {
-      this.agata?.showCharacter();
+    this.agata.showCharacter();
+    this.time.delayedCall(350, () => {
       EventBus.emit('start-brand-dialogue', this.brand.id);
     });
 
@@ -73,9 +73,10 @@ export class RoomScene extends Phaser.Scene {
   }
 
   private createBackControl(zones: ReturnType<typeof getSafeZones>): void {
-    const y = zones.hudTop + (zones.isMobile ? 4 : 10);
+    const x = this.playBounds.right - 12;
+    const y = this.playBounds.y + (zones.isMobile ? 6 : 12);
     const btn = this.add
-      .text(this.playBounds.right - 8, y, '← Pilar', {
+      .text(x, y, '← Pilar', {
         fontSize: '13px',
         fontFamily: 'Montserrat, system-ui, sans-serif',
         color: '#fff',
@@ -83,9 +84,13 @@ export class RoomScene extends Phaser.Scene {
         padding: { x: 10, y: 6 },
       })
       .setOrigin(1, 0)
-      .setDepth(70)
+      .setDepth(200)
       .setInteractive({ useHandCursor: true });
-    btn.on('pointerdown', () => this.exitRoom());
+    btn.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, ev?: Event) => {
+      ev?.stopPropagation();
+      this.agata?.forceEndDialogue();
+      this.exitRoom();
+    });
 
     this.exitHint = this.add
       .text(this.playBounds.centerX, this.playBounds.bottom - 12, '', {

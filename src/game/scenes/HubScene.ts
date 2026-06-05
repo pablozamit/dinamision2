@@ -13,10 +13,15 @@ export class HubScene extends Phaser.Scene {
   private agata: AgataGuide | null = null;
   private decor: Phaser.GameObjects.GameObject[] = [];
   private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
-  private introStarted = false;
+  private introPlayed = false;
 
   constructor() {
     super({ key: 'HubScene' });
+  }
+
+  init(): void {
+    // La escena se reutiliza: permitir volver a mostrar Ágata e intro
+    this.introPlayed = false;
   }
 
   create(): void {
@@ -27,11 +32,10 @@ export class HubScene extends Phaser.Scene {
     this.createPortals();
 
     this.agata = new AgataGuide(this);
+    this.agata.showCharacter();
+
     EventBus.on('lead-capture-complete', this.startIntro, this);
-    this.time.delayedCall(600, () => this.startIntro());
-    this.events.once('shutdown', () => {
-      EventBus.off('lead-capture-complete', this.startIntro, this);
-    });
+    this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
     this.events.on('portal-clicked', this.handlePortalClick, this);
@@ -42,9 +46,8 @@ export class HubScene extends Phaser.Scene {
   }
 
   private startIntro = (): void => {
-    if (this.introStarted) return;
-    this.introStarted = true;
-    this.agata?.showCharacter();
+    if (this.introPlayed) return;
+    this.introPlayed = true;
     EventBus.emit('start-hub-intro');
   };
 
@@ -97,12 +100,11 @@ export class HubScene extends Phaser.Scene {
   };
 
   private handlePortalClick(pillarId: PillarId): void {
-    if (this.agata?.isDialogueBlocking()) return;
+    this.agata?.forceEndDialogue();
     this.enterPortal(pillarId);
   }
 
   private enterPortal(pillarId: PillarId): void {
-    if (this.agata?.isDialogueBlocking()) return;
     EventBus.emit('dialogue-finished');
     EventBus.emit('portal-entered', pillarId);
     this.cameras.main.fadeOut(400, 0, 0, 0);
@@ -113,6 +115,8 @@ export class HubScene extends Phaser.Scene {
 
   shutdown(): void {
     this.scale.off('resize', this.onResize, this);
+    this.events.off('portal-clicked', this.handlePortalClick, this);
+    EventBus.off('lead-capture-complete', this.startIntro, this);
     this.agata?.destroy();
     this.agata = null;
   }
