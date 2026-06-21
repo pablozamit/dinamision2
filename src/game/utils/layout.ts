@@ -9,7 +9,6 @@ export interface SafeZones {
   isCoarsePointer: boolean;
 }
 
-/** Margen interno del canvas (HUD va fuera del canvas en flex). */
 const PLAY_MARGIN = 12;
 
 export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
@@ -20,12 +19,13 @@ export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
     typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
   const hudTop = 0;
-  const agataLaneWidth = Math.round(w * (isMobile ? 0.42 : 0.28));
+  // Reducimos el ancho de la calle de Agata en móvil para optimizar espacio del overlay
+  const agataLaneWidth = Math.round(w * (isMobile ? 0.30 : 0.28)); 
 
   const playArea = new Phaser.Geom.Rectangle(
-    agataLaneWidth + (isMobile ? 0 : PLAY_MARGIN),
+    0, 
     PLAY_MARGIN,
-    w - agataLaneWidth - PLAY_MARGIN,
+    agataLaneWidth, 
     h - PLAY_MARGIN * 2,
   );
 
@@ -38,7 +38,6 @@ export function getPillarStationPositions(
   count: number,
 ): Array<{ x: number; y: number }> {
   if (count <= 0) return [];
-  // CORREGIDO: Umbral de detección móvil ajustado a < 300 para asegurar la columna única en móviles reales
   const isMobile = playArea.width < 300;
   const cols = isMobile ? 1 : Math.min(count, 3);
   const rows = Math.ceil(count / cols);
@@ -81,38 +80,18 @@ export function getAgataNpcPosition(
   };
 }
 
-/** Portales en la zona derecha del hub principal. */
+/** Portales en la zona del hub principal (Desktop). */
 export function getHubPortalPositions(playArea: Phaser.Geom.Rectangle): Array<{ x: number; y: number }> {
-  // CORREGIDO: Detección móvil blindada basada en el ancho real disponible para los portales
-  const isMobile = playArea.width < 300;
-
-  if (isMobile) {
-    // CORREGIDO: Columnas alineadas a [0.25, 0.75] dentro del playArea y filas subidas a [0.28, 0.65] 
-    // para dejar el espacio superior libre y evitar solapamientos con el borde de la pantalla
-    const cols = [0.25, 0.75];
-    const rows = [0.28, 0.65];
-    const out: Array<{ x: number; y: number }> = [];
-    for (const row of rows) {
-      for (const col of cols) {
-        out.push({
-          x: playArea.x + playArea.width * col,
-          y: playArea.y + playArea.height * row,
-        });
-      }
+  const cols = [0.32, 0.72];
+  const rows = [0.35, 0.68];
+  const out: Array<{ x: number; y: number }> = [];
+  for (const row of rows) {
+    for (const col of cols) {
+      out.push({
+        x: playArea.x + playArea.width * col,
+        y: playArea.y + playArea.height * row,
+      });
     }
-    return out;
-  } else {
-    const cols = [0.32, 0.72];
-    const rows = [0.35, 0.68];
-    const out: Array<{ x: number; y: number }> = [];
-    for (const row of rows) {
-      for (const col of cols) {
-        out.push({
-          x: playArea.x + playArea.width * col,
-          y: playArea.y + playArea.height * row,
-        });
-      }
-    }
-    return out;
   }
+  return out;
 }
