@@ -43,7 +43,7 @@ export class HubScene extends Phaser.Scene {
     this.agata.showCharacter();
 
     EventBus.on('lead-capture-complete', this.startIntro, this);
-    // Restaurado el retraso para aseg que React está listo para escuchar el evento.
+    // Restaurado el retraso para asegurar que React está montado y listo para escuchar.
     this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
