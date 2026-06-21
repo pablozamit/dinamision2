@@ -2257,12 +2257,12 @@
     display: flex;
   }
 
-  /* DEVOLVEMOS LA BURBUJA DE ÁGATA A SU SITIO ORIGINAL (centrada abajo) */
+  /* DEVOLVEMOS LA BURBUJA DE ÁGATA A SU SITIO ORIGINAL (centrada) */
   .fi-agata-dialogue {
-    top: auto !important;
-    bottom: 16px !important;
+    top: 50% !important;
+    bottom: auto !important;
     left: 50% !important;
-    transform: translate(-50%, 0) !important;
-    width: 92vw !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(92vw, 380px) !important;
   }
 }
