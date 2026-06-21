@@ -918,7 +918,8 @@
   }
 
   .fi-agata-dialogue {
-    top: calc(env(safe-area-inset-top, 0px) + 118px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 200px);
+    left: 38%;
     width: 94vw;
   }
 
@@ -1486,8 +1487,8 @@
 /* Ágata dialogue overlay */
 .fi-agata-dialogue {
   position: absolute;
-  left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 132px);
+  left: 38%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 220px);
   transform: translateX(-50%);
   width: min(92vw, 420px);
   z-index: 20;
