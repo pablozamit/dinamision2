@@ -9,7 +9,6 @@ export interface SafeZones {
   isCoarsePointer: boolean;
 }
 
-/** Margen interno del canvas (HUD va fuera del canvas en flex). */
 const PLAY_MARGIN = 12;
 
 export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
@@ -20,7 +19,8 @@ export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
     typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
   const hudTop = 0;
-  const agataLaneWidth = Math.round(w * (isMobile ? 0.42 : 0.28));
+  // Ajustamos el carril de Ágata para que su aura NO se corte con el borde inferior
+  const agataLaneWidth = Math.round(w * (isMobile ? 0.35 : 0.28));
 
   const playArea = new Phaser.Geom.Rectangle(
     agataLaneWidth + (isMobile ? 0 : PLAY_MARGIN),
@@ -61,16 +61,16 @@ export function getAgataNpcPosition(
   zones: SafeZones,
 ): { x: number; y: number; scale: number; bubbleMaxWidth: number } {
   const targetHeight = zones.isMobile
-    ? Math.min(scale.height * 0.38, 280)
+    ? Math.min(scale.height * 0.35, 260) // Reducido ligeramente para que su base NO choque con el borde
     : Math.min(scale.height * 0.42, 340);
 
   const spriteScale = targetHeight / AGATA_FRAME_HEIGHT;
 
   const x = zones.isMobile
-    ? zones.agataLaneWidth * 0.55
+    ? zones.agataLaneWidth * 0.50 // Centrada en su carril
     : zones.agataLaneWidth * 0.52;
 
-  const y = scale.height - (zones.isMobile ? 25 : 40);
+  const y = scale.height - (zones.isMobile ? 30 : 40); // Subida un poco para evitar el corte inferior
 
   return {
     x,
