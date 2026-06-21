@@ -3,9 +3,7 @@ import type { DialogueNode, DialogueOption } from '../../data/dialogueData';
 
 const BUBBLE_DEPTH = 120;
 const PADDING = 16;
-/**
- * Burbuja de diálogo dibujada en Phaser, anclada al personaje.
- */
+
 export class AgataSpeechBubble {
   public readonly container: Phaser.GameObjects.Container;
   private readonly scene: Phaser.Scene;
@@ -58,10 +56,8 @@ export class AgataSpeechBubble {
     this.clearChoices();
 
     const isMobile = this.scene.scale.width <= 480;
-    // Móvil: burbuja más estrecha y con tipografía menor para que no tape la 1ª lápida
     this.bubbleW = Math.min(maxWidth, isMobile ? Math.min(this.scene.scale.width * 0.78, 300) : 320);
     this.bodyText.setWordWrapWidth(this.bubbleW - PADDING * 2);
-    // setFontSize muta sin perder fontFamily / color — más seguro que setStyle
     this.bodyText.setFontSize(isMobile ? '12px' : '15px');
     this.nameText.setFontSize(isMobile ? '10px' : '11px');
     this.hintText.setFontSize(isMobile ? '10px' : '11px');
@@ -137,7 +133,6 @@ export class AgataSpeechBubble {
     this.bg.fillRoundedRect(0, 0, w, h, r);
     this.bg.strokeRoundedRect(0, 0, w, h, r);
 
-    // Comic tail (más fina y centrada hacia Ágata)
     const tailX = w * 0.15;
     this.bg.fillTriangle(tailX, h, tailX + 24, h, tailX + 8, h + 12);
     this.bg.lineStyle(2, 0x705893, 0.45);
@@ -149,6 +144,7 @@ export class AgataSpeechBubble {
     this.hintText.setPosition(PADDING, h - 24);
   }
 
+  // FIX 3: Aplica la compensación vertical restando bubbleH para que flote perfectamente sobre su cabeza
   private layoutAt(anchorX: number, anchorTopY: number): void {
     const isMobile = this.scene.scale.width <= 480;
     const margin = 8;
@@ -159,7 +155,8 @@ export class AgataSpeechBubble {
         margin,
         this.scene.scale.width - this.bubbleW - margin,
       );
-      this.container.setPosition(x, anchorTopY);
+      const y = anchorTopY - this.bubbleH - 10;
+      this.container.setPosition(x, y);
       return;
     }
 
