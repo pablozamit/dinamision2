@@ -74,20 +74,20 @@ export class RoomScene extends Phaser.Scene {
       .slice(0, 2)
       .toUpperCase();
 
+    // CORREGIDO: Se quita 'alpha' de las propiedades de TextStyle y se aplica mediante `.setAlpha(0.85)`
     this.add.text(centerX, centerY - (zones.isMobile ? 14 : 20), initials, {
       fontSize: zones.isMobile ? '36px' : '48px',
       fontFamily: 'Montserrat, system-ui, sans-serif',
       color: '#ffffff',
-      fontStyle: 'bold',
-      alpha: 0.85
-    }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
+      fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2).setAlpha(0.85);
 
+    // CORREGIDO: Se elimina 'letterSpacing' para cumplir estrictamente con el tipo TextStyle de Phaser
     this.add.text(centerX, centerY + (zones.isMobile ? 24 : 32), this.brand.name.toUpperCase(), {
       fontSize: zones.isMobile ? '14px' : '16px',
       fontFamily: 'Montserrat, system-ui, sans-serif',
       color: '#f6a000',
-      fontStyle: 'bold',
-      letterSpacing: 2
+      fontStyle: 'bold'
     }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
 
     this.tweens.add({
@@ -149,7 +149,6 @@ export class RoomScene extends Phaser.Scene {
     this.playBounds = zones.playArea;
   };
 
-  // CORREGIDO: Ahora te expulsa directamente hacia HubScene (los 4 pilares)
   private exitRoom = (): void => {
     EventBus.emit('dialogue-finished');
     this.cameras.main.fadeOut(400, 0, 0, 0);
