@@ -71,6 +71,9 @@ export class PillarScene extends Phaser.Scene {
 
     this.scheduleLightning();
 
+    // NUEVO: Registra el limpiador para que se ejecute al salir de esta pantalla
+    this.events.once('shutdown', this.shutdown, this);
+
     EventBus.emit('current-scene-ready', this);
     EventBus.emit('pillar-progress-updated', {
       pillar: this.pillarData.id,
