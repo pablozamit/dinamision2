@@ -23,8 +23,7 @@ export class HubScene extends Phaser.Scene {
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
     
-    // CORREGIDO: Solo saltamos la intro si REALMENTE hay pilares completados.
-    // Si es la primera vez (o solo tiene el lead guardado), la intro debe sonar.
+    // Solo saltamos la intro si REALMENTE hay pilares completados.
     if (stored && stored.pillarsCompleted && stored.pillarsCompleted.length > 0) {
       this.introPlayed = true;
     } else {
@@ -43,8 +42,9 @@ export class HubScene extends Phaser.Scene {
     this.agata = new AgataGuide(this);
     this.agata.showCharacter();
 
-    // CORREGIDO: Eliminado el delayedCall que causaba que la burbuja apareciese dos veces.
     EventBus.on('lead-capture-complete', this.startIntro, this);
+    // Restaurado el retraso para aseg que React está listo para escuchar el evento.
+    this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
     this.events.on('portal-clicked', this.handlePortalClick, this);
@@ -138,12 +138,6 @@ export class HubScene extends Phaser.Scene {
   }
 
   private createPortals(): void {
-    const zones = getSafeZones(this.scale);
-    // CORREGIDO: Si es móvil, NO renderizamos portales en Phaser. React se encarga.
-    if (zones.isMobile) {
-      return; 
-    }
-
     const positions = getHubPortalPositions(this.playBounds);
     this.portals = PILLAR_ORDER.map((id, index) => {
       const portal = Portal.fromPillar(this, positions[index].x, positions[index].y, id, false, index * 70);
@@ -157,13 +151,10 @@ export class HubScene extends Phaser.Scene {
   private onResize = (): void => {
     const zones = getSafeZones(this.scale);
     this.playBounds = zones.playArea;
-    
-    if (!zones.isMobile && this.portals.length > 0) {
-      const positions = getHubPortalPositions(this.playBounds);
-      this.portals.forEach((portal, i) => {
-        portal.container.setPosition(positions[i].x, positions[i].y);
-      });
-    }
+    const positions = getHubPortalPositions(this.playBounds);
+    this.portals.forEach((portal, i) => {
+      portal.container.setPosition(positions[i].x, positions[i].y);
+    });
   };
 
   private handlePortalClick(pillarId: PillarId): void {
