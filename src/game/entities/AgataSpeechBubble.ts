@@ -144,7 +144,7 @@ export class AgataSpeechBubble {
     this.hintText.setPosition(PADDING, h - 24);
   }
 
-  // FIX 3: Aplica la compensación vertical restando bubbleH para que flote perfectamente sobre su cabeza
+  // CORREGIDO: En móviles, posicionamos la burbuja encima del personaje restando bubbleH (cola apuntando hacia abajo).
   private layoutAt(anchorX: number, anchorTopY: number): void {
     const isMobile = this.scene.scale.width <= 480;
     const margin = 8;
@@ -155,6 +155,7 @@ export class AgataSpeechBubble {
         margin,
         this.scene.scale.width - this.bubbleW - margin,
       );
+      // CORREGIDO: Compensamos la altura para que flote encima de la cabeza real.
       const y = anchorTopY - this.bubbleH - 10;
       this.container.setPosition(x, y);
       return;
