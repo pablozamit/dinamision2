@@ -123,7 +123,6 @@
   overflow: hidden;
 }
 
-/* Decorative top gradient wash */
 .fi-screen--lead::before {
   content: '';
   position: absolute;
@@ -136,7 +135,6 @@
   pointer-events: none;
 }
 
-/* Decorative gold accent orb */
 .fi-screen--lead::after {
   content: '';
   position: absolute;
@@ -339,7 +337,6 @@
   overflow: hidden;
 }
 
-/* Shimmer effect on gold button */
 .fi-cta-btn--gold::after {
   content: '';
   position: absolute;
@@ -388,7 +385,6 @@
   text-align: center;
 }
 
-/* Shimmer on giant button */
 .fi-cta-btn--giant::after {
   content: '';
   position: absolute;
@@ -433,7 +429,6 @@
   align-items: flex-start;
 }
 
-/* Subtle decorative element */
 .fi-screen--pillar::before {
   content: '';
   position: absolute;
@@ -646,7 +641,6 @@
   position: relative;
 }
 
-/* Top accent line on result card */
 .fi-result-card::before {
   content: '';
   position: absolute;
@@ -772,7 +766,6 @@
   overflow: hidden;
 }
 
-/* Dramatic background effect */
 .fi-screen--final::before {
   content: '';
   position: absolute;
@@ -2178,10 +2171,10 @@
    ============================================ */
 .fi-mobile-portals-overlay {
   position: absolute;
-  top: 140px; /* Debajo del HUD superior */
+  top: 140px; 
   right: 14px;
   z-index: 15;
-  display: none; /* Oculto por defecto */
+  display: none; 
   flex-direction: column;
   gap: 10px;
   width: 52%;
@@ -2252,12 +2245,10 @@
 
 /* Ajuste adaptativo para resoluciones móviles */
 @media (max-width: 480px) {
-  /* Mostramos el overlay de portales */
   .fi-mobile-portals-overlay {
     display: flex;
   }
 
-  /* DEVOLVEMOS LA BURBUJA DE ÁGATA A SU SITIO ORIGINAL (centrada) */
   .fi-agata-dialogue {
     top: 50% !important;
     bottom: auto !important;
