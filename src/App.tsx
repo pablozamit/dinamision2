@@ -3,34 +3,20 @@ import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
 import FinalScreen from './components/FinalScreen';
 import AgataDialogueOverlay from './components/AgataDialogueOverlay';
+import MobilePortalsOverlay from './components/MobilePortalsOverlay';
 
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
-import { pillars } from './data/brandData';
-import type { Brand } from './data/brandData';
 import './index.css';
 
 type AppPhase = 'mission' | 'hub' | 'pillar' | 'final';
 
-/**
- * `App` - Orquestador principal del flujo del juego.
- *
- * Fases:
- *  - `mission`: MissionIntro (landing + form)
- *  - `hub`: PhaserGame corriendo HubScene
- *  - `pillar`: PhaserGame corriendo PillarScene + BrandPanel overlay
- *  - `final`: FinalScreen (futuro)
- *
- * Toda la comunicación con Phaser se hace vía EventBus. El ref del juego
- * solo se usa para iniciar/detener escenas (no para mutar estado).
- */
 export default function App() {
   const [phase, setPhase] = useState<AppPhase>('mission');
   const [progress, setProgress] = useState<GameProgress | null>(null);
   const [currentPillar, setCurrentPillar] = useState<string | null>(null);
   const gameRef = useRef<IRefPhaserGame>({ game: null, scene: null });
 
-  // Re-hidratar progreso persistido al montar
   useEffect(() => {
     const stored = loadProgress();
     if (stored) {
@@ -43,7 +29,6 @@ export default function App() {
     }
   }, []);
 
-  // Suscribirse a eventos del juego
   useEffect(() => {
     const onPortalEntered = (pillarId: string): void => {
       setCurrentPillar(pillarId);
@@ -89,9 +74,6 @@ export default function App() {
     };
 
     const onDialogueFinished = (): void => {
-      // Phaser gestiona las transiciones de escena por sí solo.
-      // Aquí solo sincronizamos el estado de React: 'phase' lo marca
-      // 'current-scene-ready', NO este evento genérico de diálogo.
       setCurrentPillar(null);
     };
 
@@ -127,7 +109,6 @@ export default function App() {
     };
   }, []);
 
-  // Cuando entramos al hub, iniciamos HubScene (solo si Phaser no está ya en transición)
   useEffect(() => {
     const sm = gameRef.current.scene?.scene;
     if (phase !== 'hub' || !sm) return;
@@ -154,6 +135,15 @@ export default function App() {
         <div className="fi-game-stage">
           <PhaserGame ref={gameRef} />
           <AgataDialogueOverlay />
+
+          {phase === 'hub' && (
+            <MobilePortalsOverlay 
+              pillarsCompleted={progress?.pillarsCompleted ?? []} 
+              onPortalClick={(pillarId) => {
+                EventBus.emit('portal-entered', pillarId);
+              }}
+            />
+          )}
         </div>
       )}
 
