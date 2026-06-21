@@ -66,7 +66,6 @@ export class AgataGuide {
     this.sprite.setOrigin(0.5, 1);
 
     this.root.add([this.aura, this.sprite]);
-    // CORREGIDO: Recuperamos la burbuja de Phaser nativa.
     this.bubble = new AgataSpeechBubble(scene);
 
     this.applyLayout();
@@ -176,7 +175,6 @@ export class AgataGuide {
       this.breatheTween?.resume();
       this.startIdleBreathing();
     } else if (state === 'talk') {
-      // Habría que añadir animaciones de talk, de momento idle.
       this.sprite.play('agata-idle-anim', true);
     } else if (state === 'jump') {
       this.jump();
@@ -230,9 +228,9 @@ export class AgataGuide {
     this.root.setScale(pos.scale);
     this.sprite.setPosition(0, 0);
 
-    // CORREGIDO: Reducimos el radio del aura morada en móviles para que no se corte por el borde.
+    // CORREGIDO: Usamos displayHeight (ya escala) y subimos el factor para que el aura quede centrada en el torso/cabeza.
     const auraRadiusFactor = this.zones.isMobile ? 0.35 : 0.4;
-    this.aura.setPosition(0, -this.sprite.displayHeight * 0.45);
+    this.aura.setPosition(0, -this.sprite.displayHeight * 0.55);
     this.aura.setRadius(this.sprite.displayWidth * auraRadiusFactor);
 
     if (this.currentNodeId && this.activeDialogue) {
@@ -241,7 +239,6 @@ export class AgataGuide {
     }
   }
 
-  // CORREGIDO: Recuperamos el cálculo del ancla de la burbuja nativa de Phaser.
   private getBubbleAnchor(): { x: number; y: number; maxWidth: number } {
     const pos = getAgataNpcPosition(this.scene.scale, this.zones);
     if (this.zones.isMobile) {
