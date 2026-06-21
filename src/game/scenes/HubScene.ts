@@ -6,9 +6,6 @@ import { getSafeZones, getHubPortalPositions } from '../utils/layout';
 import { loadProgress } from '../utils/storage';
 import { PILLAR_ORDER } from '../../data/pillarAssets';
 
-/**
- * Hub del museo: Ágata NPC, portales táctiles (sin avatar jugador).
- */
 export class HubScene extends Phaser.Scene {
   private portals: Portal[] = [];
   private agata: AgataGuide | null = null;
@@ -25,13 +22,7 @@ export class HubScene extends Phaser.Scene {
   init(data?: { pillarsCompleted?: string[] }): void {
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
-    
-    // CORREGIDO: Evita que Ágata repita su discurso de bienvenida completo cada vez que regresas de un pilar
-    if (stored && stored.pillarsCompleted.length > 0) {
-      this.introPlayed = true;
-    } else {
-      this.introPlayed = false;
-    }
+    this.introPlayed = stored ? true : false;
   }
 
   create(): void {
@@ -54,15 +45,12 @@ export class HubScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#0a030d');
     this.cameras.main.fadeIn(500, 0, 0, 0);
 
-    // Reproducir ambiente si no está sonando ya
     const ambient = this.sound.get('ambient-horror');
     if (!ambient || !ambient.isPlaying) {
       this.sound.play('ambient-horror', { loop: true, volume: 0.3 });
     }
 
     this.scheduleLightning();
-
-    // Registra el limpiador para que se ejecute al salir de esta pantalla
     this.events.once('shutdown', this.shutdown, this);
 
     EventBus.emit('current-scene-ready', this);
@@ -143,6 +131,13 @@ export class HubScene extends Phaser.Scene {
   }
 
   private createPortals(): void {
+    const zones = getSafeZones(this.scale);
+    // En móviles abortamos el renderizado interno de portales de Phaser
+    if (zones.isMobile) {
+      EventBus.emit('render-mobile-portals', true);
+      return; 
+    }
+
     const positions = getHubPortalPositions(this.playBounds);
     this.portals = PILLAR_ORDER.map((id, index) => {
       const portal = Portal.fromPillar(this, positions[index].x, positions[index].y, id, false, index * 70);
@@ -156,10 +151,13 @@ export class HubScene extends Phaser.Scene {
   private onResize = (): void => {
     const zones = getSafeZones(this.scale);
     this.playBounds = zones.playArea;
-    const positions = getHubPortalPositions(this.playBounds);
-    this.portals.forEach((portal, i) => {
-      portal.container.setPosition(positions[i].x, positions[i].y);
-    });
+    
+    if (!zones.isMobile && this.portals.length > 0) {
+      const positions = getHubPortalPositions(this.playBounds);
+      this.portals.forEach((portal, i) => {
+        portal.container.setPosition(positions[i].x, positions[i].y);
+      });
+    }
   };
 
   private handlePortalClick(pillarId: PillarId): void {
