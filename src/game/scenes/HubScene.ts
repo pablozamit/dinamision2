@@ -43,8 +43,8 @@ export class HubScene extends Phaser.Scene {
     this.agata = new AgataGuide(this);
     this.agata.showCharacter();
 
+    // CORREGIDO: Eliminado el delayedCall que causaba que la burbuja apareciese dos veces.
     EventBus.on('lead-capture-complete', this.startIntro, this);
-    this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
     this.events.on('portal-clicked', this.handlePortalClick, this);
