@@ -21,6 +21,7 @@ export default function AgataDialogueOverlay() {
 
   const startDialogue = useCallback((dialogue: BrandDialogue, brandId: string | null = null) => {
     setState({ dialogue, nodeId: dialogue.startNodeId, brandId });
+    EventBus.emit('dialogue-started');
   }, []);
 
   const endDialogue = useCallback(() => {
