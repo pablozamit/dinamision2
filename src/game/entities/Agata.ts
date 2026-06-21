@@ -18,9 +18,8 @@ export class Agata {
     this.guide.playState('idle');
   }
 
-  public playDialogue(dialogue: BrandDialogue): void {
-    this.guide.playDialogue(dialogue);
-  }
+  /** El diálogo ahora lo gestiona AgataDialogueOverlay vía EventBus. No-op. */
+  public playDialogue(_dialogue: BrandDialogue): void {}
 
   public destroy(): void {
     this.guide.destroy();
