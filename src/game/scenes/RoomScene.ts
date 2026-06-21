@@ -45,27 +45,20 @@ export class RoomScene extends Phaser.Scene {
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.scale.on('resize', this.onResize, this);
 
-    // Limpiador de escena al salir
     this.events.once('shutdown', this.shutdown, this);
 
     EventBus.emit('current-scene-ready', this);
     EventBus.emit('brand-selected', this.brand);
   }
 
-  /**
-   * Genera una escenografía inmersiva personalizada para la marca en lugar de cajas vacías.
-   */
   private createRoomDecor(zones: ReturnType<typeof getSafeZones>): void {
-    const { width } = this.scale;
     const centerX = this.playBounds.centerX;
     const centerY = this.playBounds.y + this.playBounds.height * 0.45;
 
-    // 1. Aura de luz mística de fondo adaptada al pilar
     const glow = this.add.graphics().setDepth(ROOM_DEPTH);
     glow.fillStyle(0x705893, 0.12);
     glow.fillCircle(centerX, centerY, zones.isMobile ? 110 : 140);
 
-    // 2. Tumba/Altar central destacado de la marca
     const altar = this.add.graphics().setDepth(ROOM_DEPTH + 1);
     const aw = zones.isMobile ? 160 : 220;
     const ah = zones.isMobile ? 120 : 150;
@@ -74,7 +67,6 @@ export class RoomScene extends Phaser.Scene {
     altar.lineStyle(2, 0xf6a000, 0.6);
     altar.strokeRoundedRect(centerX - aw / 2, centerY - ah / 2, aw, ah, 12);
 
-    // 3. Iniciales gigantes de la marca en el centro del altar
     const initials = this.brand.name
       .split(' ')
       .map((w) => w.charAt(0))
@@ -90,7 +82,6 @@ export class RoomScene extends Phaser.Scene {
       alpha: 0.85
     }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
 
-    // 4. Nombre completo de la marca rotulado en el altar
     this.add.text(centerX, centerY + (zones.isMobile ? 24 : 32), this.brand.name.toUpperCase(), {
       fontSize: zones.isMobile ? '14px' : '16px',
       fontFamily: 'Montserrat, system-ui, sans-serif',
@@ -99,7 +90,6 @@ export class RoomScene extends Phaser.Scene {
       letterSpacing: 2
     }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
 
-    // 5. Animación de pulsación suave para que el altar se sienta vivo
     this.tweens.add({
       targets: glow,
       alpha: 0.4,
@@ -159,11 +149,12 @@ export class RoomScene extends Phaser.Scene {
     this.playBounds = zones.playArea;
   };
 
+  // CORREGIDO: Ahora te expulsa directamente hacia HubScene (los 4 pilares)
   private exitRoom = (): void => {
     EventBus.emit('dialogue-finished');
     this.cameras.main.fadeOut(400, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start('PillarScene', { pillarId: this.pillarId });
+      this.scene.start('HubScene');
     });
   };
 
