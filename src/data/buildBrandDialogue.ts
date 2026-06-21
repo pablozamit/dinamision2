@@ -4,7 +4,21 @@ import type { BrandDialogue } from './dialogueData';
 /**
  * Construye el guion de Ágata para una sala de marca a partir de `brand.result`.
  */
-export function buildBrandDialogue(brand: Brand): BrandDialogue {
+export function buildBrandDialogue(brand: Brand | undefined): BrandDialogue {
+  if (!brand || !brand.result) {
+    return {
+      startNodeId: 'error',
+      nodes: {
+        error: {
+          id: 'error',
+          speaker: 'agata',
+          text: 'Esta lápida está borrosa... No logro leer su inscripción.',
+          options: [{ text: 'Volver al pilar', nextId: '' }],
+        }
+      }
+    };
+  }
+
   const { result } = brand;
   return {
     startNodeId: 'intro',
@@ -38,7 +52,8 @@ export function buildBrandDialogue(brand: Brand): BrandDialogue {
         speaker: 'agata',
         text: `🧪 ${result.fraseClave}`,
         onComplete: 'frase-clave-collected',
-        options: [{ text: '💀 Recoger el Antídoto y volver', nextId: 'exit' }],
+        // CORREGIDO: Volvemos a usar 'exit' para que AgataGuide intercepte la acción y ejecute la salida automática
+        options: [{ text: '💀 Recoger el Antídoto y volver', nextId: 'exit' }], 
       },
     },
   };
