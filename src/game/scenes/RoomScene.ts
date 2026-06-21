@@ -4,6 +4,9 @@ import { EventBus } from '../EventBus';
 import type { Brand } from '../../data/brandData';
 import { getSafeZones } from '../utils/layout';
 
+const ROOM_DEPTH = 30;
+const UI_DEPTH = 200;
+
 export class RoomScene extends Phaser.Scene {
   private agata: AgataGuide | null = null;
   private brand!: Brand;
@@ -42,39 +45,69 @@ export class RoomScene extends Phaser.Scene {
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.scale.on('resize', this.onResize, this);
 
-    // NUEVO: Registra el limpiador para que se ejecute al salir de esta pantalla
+    // Limpiador de escena al salir
     this.events.once('shutdown', this.shutdown, this);
 
     EventBus.emit('current-scene-ready', this);
     EventBus.emit('brand-selected', this.brand);
   }
 
+  /**
+   * Genera una escenografía inmersiva personalizada para la marca en lugar de cajas vacías.
+   */
   private createRoomDecor(zones: ReturnType<typeof getSafeZones>): void {
     const { width } = this.scale;
-    if (!zones.isMobile) {
-      this.add
-        .text(width / 2, zones.hudTop + 6, this.brand.name, {
-          fontSize: '13px',
-          fontFamily: 'Montserrat, system-ui, sans-serif',
-          color: '#887799',
-        })
-        .setOrigin(0.5, 0);
-    }
+    const centerX = this.playBounds.centerX;
+    const centerY = this.playBounds.y + this.playBounds.height * 0.45;
 
-    const slots = 3;
-    for (let i = 0; i < slots; i++) {
-      const x = this.playBounds.x + (this.playBounds.width / (slots + 1)) * (i + 1);
-      const y = this.playBounds.y + this.playBounds.height * 0.42;
-      const rect = this.add.rectangle(x, y, 100, 130, 0x1a0a2a, 0.45);
-      rect.setStrokeStyle(2, 0x3a1a4a, 0.8);
-      this.tweens.add({
-        targets: rect,
-        alpha: 0.75,
-        duration: 2000 + i * 400,
-        yoyo: true,
-        repeat: -1,
-      });
-    }
+    // 1. Aura de luz mística de fondo adaptada al pilar
+    const glow = this.add.graphics().setDepth(ROOM_DEPTH);
+    glow.fillStyle(0x705893, 0.12);
+    glow.fillCircle(centerX, centerY, zones.isMobile ? 110 : 140);
+
+    // 2. Tumba/Altar central destacado de la marca
+    const altar = this.add.graphics().setDepth(ROOM_DEPTH + 1);
+    const aw = zones.isMobile ? 160 : 220;
+    const ah = zones.isMobile ? 120 : 150;
+    altar.fillStyle(0x1a1a2e, 0.85);
+    altar.fillRoundedRect(centerX - aw / 2, centerY - ah / 2, aw, ah, 12);
+    altar.lineStyle(2, 0xf6a000, 0.6);
+    altar.strokeRoundedRect(centerX - aw / 2, centerY - ah / 2, aw, ah, 12);
+
+    // 3. Iniciales gigantes de la marca en el centro del altar
+    const initials = this.brand.name
+      .split(' ')
+      .map((w) => w.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+
+    this.add.text(centerX, centerY - (zones.isMobile ? 14 : 20), initials, {
+      fontSize: zones.isMobile ? '36px' : '48px',
+      fontFamily: 'Montserrat, system-ui, sans-serif',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      alpha: 0.85
+    }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
+
+    // 4. Nombre completo de la marca rotulado en el altar
+    this.add.text(centerX, centerY + (zones.isMobile ? 24 : 32), this.brand.name.toUpperCase(), {
+      fontSize: zones.isMobile ? '14px' : '16px',
+      fontFamily: 'Montserrat, system-ui, sans-serif',
+      color: '#f6a000',
+      fontStyle: 'bold',
+      letterSpacing: 2
+    }).setOrigin(0.5, 0.5).setDepth(ROOM_DEPTH + 2);
+
+    // 5. Animación de pulsación suave para que el altar se sienta vivo
+    this.tweens.add({
+      targets: glow,
+      alpha: 0.4,
+      duration: 2000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
   }
 
   private createBackControl(zones: ReturnType<typeof getSafeZones>): void {
@@ -89,8 +122,9 @@ export class RoomScene extends Phaser.Scene {
         padding: { x: 10, y: 6 },
       })
       .setOrigin(1, 0)
-      .setDepth(200)
+      .setDepth(UI_DEPTH)
       .setInteractive({ useHandCursor: true });
+      
     btn.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, ev?: Event) => {
       ev?.stopPropagation();
       this.agata?.forceEndDialogue();
