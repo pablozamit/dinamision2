@@ -42,6 +42,9 @@ export class RoomScene extends Phaser.Scene {
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.scale.on('resize', this.onResize, this);
 
+    // NUEVO: Registra el limpiador para que se ejecute al salir de esta pantalla
+    this.events.once('shutdown', this.shutdown, this);
+
     EventBus.emit('current-scene-ready', this);
     EventBus.emit('brand-selected', this.brand);
   }
