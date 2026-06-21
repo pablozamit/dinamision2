@@ -2178,14 +2178,14 @@
    ============================================ */
 .fi-mobile-portals-overlay {
   position: absolute;
-  top: 135px;
+  top: 140px; /* Debajo del HUD superior */
   right: 14px;
   z-index: 15;
-  display: none;
+  display: none; /* Oculto por defecto */
   flex-direction: column;
   gap: 10px;
-  width: 54%;
-  max-width: 210px;
+  width: 52%;
+  max-width: 200px;
 }
 
 .fi-mobile-portal {
@@ -2252,10 +2252,12 @@
 
 /* Ajuste adaptativo para resoluciones móviles */
 @media (max-width: 480px) {
+  /* Mostramos el overlay de portales */
   .fi-mobile-portals-overlay {
     display: flex;
   }
 
+  /* DEVOLVEMOS LA BURBUJA DE ÁGATA A SU SITIO ORIGINAL (centrada abajo) */
   .fi-agata-dialogue {
     top: auto !important;
     bottom: 16px !important;
