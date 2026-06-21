@@ -41,6 +41,8 @@ export class HubScene extends Phaser.Scene {
     this.agata.showCharacter();
 
     EventBus.on('lead-capture-complete', this.startIntro, this);
+    EventBus.on('dialogue-started', this.hidePortals, this);
+    EventBus.on('dialogue-finished', this.showPortals, this);
     this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
@@ -157,6 +159,14 @@ export class HubScene extends Phaser.Scene {
     });
   };
 
+  private hidePortals = (): void => {
+    this.portals.forEach(p => p.container.setVisible(false));
+  };
+
+  private showPortals = (): void => {
+    this.portals.forEach(p => p.container.setVisible(true));
+  };
+
   private handlePortalClick(pillarId: PillarId): void {
     this.agata?.forceEndDialogue();
     this.enterPortal(pillarId);
@@ -174,6 +184,8 @@ export class HubScene extends Phaser.Scene {
     this.scale.off('resize', this.onResize, this);
     this.events.off('portal-clicked', this.handlePortalClick, this);
     EventBus.off('lead-capture-complete', this.startIntro, this);
+    EventBus.off('dialogue-started', this.hidePortals, this);
+    EventBus.off('dialogue-finished', this.showPortals, this);
     if (this.lightningTimer) this.lightningTimer.remove();
     this.agata?.destroy();
     this.agata = null;
