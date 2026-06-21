@@ -57,6 +57,9 @@ export class HubScene extends Phaser.Scene {
 
     this.scheduleLightning();
 
+    // NUEVO: Registra el limpiador para que se ejecute al salir de esta pantalla
+    this.events.once('shutdown', this.shutdown, this);
+
     EventBus.emit('current-scene-ready', this);
   }
 
