@@ -11,17 +11,11 @@ interface DialogueState {
   brandId: string | null;
 }
 
-/**
- * Overlay React que renderiza el diálogo de Ágata sobre el canvas de Phaser.
- * Reemplaza AgataSpeechBubble (Phaser) en móvil y desktop.
- * Se comunica con Phaser únicamente vía EventBus.
- */
 export default function AgataDialogueOverlay() {
   const [state, setState] = useState<DialogueState | null>(null);
 
   const startDialogue = useCallback((dialogue: BrandDialogue, brandId: string | null = null) => {
     setState({ dialogue, nodeId: dialogue.startNodeId, brandId });
-    EventBus.emit('dialogue-started');
   }, []);
 
   const endDialogue = useCallback(() => {
@@ -30,14 +24,13 @@ export default function AgataDialogueOverlay() {
   }, []);
 
   const advance = useCallback((node: DialogueNode) => {
-    if (!state) return;
-    if (node.options && node.options.length > 0) return; // choices handle their own advance
+    if (node.options && node.options.length > 0) return;
     if (!node.nextId || node.nextId === 'end' || node.nextId === 'exit') {
       endDialogue();
       return;
     }
     setState((prev) => prev ? { ...prev, nodeId: node.nextId! } : null);
-  }, [state, endDialogue]);
+  }, [endDialogue]);
 
   const handleChoice = useCallback((nextId: string) => {
     if (!nextId || nextId === 'end') { endDialogue(); return; }
@@ -81,18 +74,26 @@ export default function AgataDialogueOverlay() {
       });
     };
 
+    // Listener de seguridad: si Phaser cambia de escena, cerramos el diálogo forzosamente.
+    const onSceneReady = () => {
+      if (state) {
+        setState(null);
+      }
+    };
+
     EventBus.on('start-hub-intro', onHubIntro);
     EventBus.on('start-pillar-intro', onPillarIntro);
     EventBus.on('start-brand-dialogue', onBrandDialogue);
+    EventBus.on('current-scene-ready', onSceneReady);
 
     return () => {
       EventBus.off('start-hub-intro', onHubIntro);
       EventBus.off('start-pillar-intro', onPillarIntro);
       EventBus.off('start-brand-dialogue', onBrandDialogue);
+      EventBus.off('current-scene-ready', onSceneReady);
     };
-  }, [startDialogue]);
+  }, [startDialogue, state]);
 
-  // Emitir frase-clave cuando el nodo lo requiere
   useEffect(() => {
     if (!state) return;
     const node = state.dialogue.nodes[state.nodeId];
