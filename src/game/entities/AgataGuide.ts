@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
-import { AgataSpeechBubble } from './AgataSpeechBubble';
 import { EventBus } from '../EventBus';
 import {
   getSafeZones,
   getAgataNpcPosition,
   type SafeZones,
 } from '../utils/layout';
-import type { BrandDialogue, DialogueNode } from '../../data/dialogueData';
+import type { BrandDialogue } from '../../data/dialogueData';
 import { hubIntroDialogue } from '../../data/dialogueData';
 import { findBrandById } from '../../data/brandData';
 import { buildBrandDialogue } from '../../data/buildBrandDialogue';
@@ -18,14 +17,11 @@ export class AgataGuide {
   private readonly scene: Phaser.Scene;
   private readonly sprite: Phaser.GameObjects.Sprite;
   private readonly aura: Phaser.GameObjects.Arc;
-  private readonly bubble: AgataSpeechBubble;
   private zones: SafeZones;
   private breatheTween: Phaser.Tweens.Tween | null = null;
   private jumpTween: Phaser.Tweens.Tween | null = null;
   private walkTimer: Phaser.Time.TimerEvent | null = null;
   private activeDialogue: BrandDialogue | null = null;
-  private currentNodeId: string | null = null;
-  private activeBrandId: string | null = null;
   private visible = false;
 
   constructor(scene: Phaser.Scene) {
@@ -58,15 +54,11 @@ export class AgataGuide {
       });
     }
 
-    this.aura = scene.add
-      .circle(0, 0, 40, 0x8a2be2, 0.4)
-      .setStrokeStyle(2, 0xd32f2f, 0.8);
-
+    this.aura = scene.add.circle(0, 0, 40, 0x8a2be2, 0.4).setStrokeStyle(2, 0xd32f2f, 0.8);
     this.sprite = scene.add.sprite(0, 0, 'agata-idle');
     this.sprite.setOrigin(0.5, 1);
 
     this.root.add([this.aura, this.sprite]);
-    this.bubble = new AgataSpeechBubble(scene);
 
     this.applyLayout();
     this.root.setAlpha(0);
@@ -107,64 +99,13 @@ export class AgataGuide {
     if (this.activeDialogue) this.endDialogue();
   }
 
-  public playDialogue(dialogue: BrandDialogue, brandId?: string): void {
+  private playDialogue(dialogue: BrandDialogue, brandId?: string): void {
     this.showCharacter();
     this.activeDialogue = dialogue;
-    this.activeBrandId = brandId ?? null;
-    this.showNode(dialogue.startNodeId);
-  }
-
-  private showNode(nodeId: string): void {
-    if (!this.activeDialogue) return;
-    const node = this.activeDialogue.nodes[nodeId];
-    if (!node) {
-      this.endDialogue();
-      return;
-    }
-    this.currentNodeId = nodeId;
-
-    if (node.onComplete === 'frase-clave-collected' && this.activeBrandId) {
-      const brand = findBrandById(this.activeBrandId);
-      if (brand) {
-        EventBus.emit('frase-clave-collected', brand.result.fraseClave);
-      }
-    }
-
-    const anchor = this.getBubbleAnchor();
-    this.bubble.show(node, anchor.x, anchor.y, anchor.maxWidth, {
-      onAdvance: () => this.advanceFromNode(node),
-      onChoice: (nextId) => this.handleChoice(nextId),
-    });
-    this.bubble.enableTapAdvance();
-  }
-
-  private advanceFromNode(node: DialogueNode): void {
-    if (node.options && node.options.length > 0) return;
-    if (node.nextId === 'exit' || node.nextId === 'end' || !node.nextId) {
-      this.endDialogue();
-      return;
-    }
-    this.showNode(node.nextId);
-  }
-
-  private handleChoice(nextId: string): void {
-    if (!nextId) {
-      this.endDialogue();
-      return;
-    }
-    if (nextId === 'exit') {
-      EventBus.emit('dialogue-exit-request');
-      this.endDialogue();
-      return;
-    }
-    this.showNode(nextId);
   }
 
   private endDialogue(): void {
-    this.bubble.hide();
     this.activeDialogue = null;
-    this.currentNodeId = null;
-    this.activeBrandId = null;
     this.playState('idle');
     EventBus.emit('dialogue-finished');
   }
@@ -186,10 +127,8 @@ export class AgataGuide {
 
   private jump(): void {
     if (this.jumpTween?.isPlaying()) return;
-
     this.breatheTween?.pause();
     this.sprite.play('agata-jump-anim');
-
     this.jumpTween = this.scene.tweens.add({
       targets: this.sprite,
       y: -40,
@@ -206,7 +145,6 @@ export class AgataGuide {
 
   private startIdleBreathing(): void {
     if (this.breatheTween) return;
-
     this.breatheTween = this.scene.tweens.add({
       targets: this.sprite,
       scaleY: 1.02,
@@ -217,10 +155,6 @@ export class AgataGuide {
     });
   }
 
-  public isDialogueBlocking(): boolean {
-    return this.activeDialogue !== null;
-  }
-
   private applyLayout(): void {
     this.zones = getSafeZones(this.scene.scale);
     const pos = getAgataNpcPosition(this.scene.scale, this.zones);
@@ -228,33 +162,10 @@ export class AgataGuide {
     this.root.setScale(pos.scale);
     this.sprite.setPosition(0, 0);
 
-    // CORREGIDO: Usamos displayHeight para que el cálculo del centro respete el scale aplicado al sprite.
+    // Aura perfectamente centrada usando la escala real del sprite.
     const auraRadiusFactor = this.zones.isMobile ? 0.35 : 0.4;
     this.aura.setPosition(0, -this.sprite.displayHeight * 0.55);
     this.aura.setRadius(this.sprite.displayWidth * auraRadiusFactor);
-
-    if (this.currentNodeId && this.activeDialogue) {
-      const anchor = this.getBubbleAnchor();
-      this.bubble.setPosition(anchor.x, anchor.y, anchor.maxWidth);
-    }
-  }
-
-  private getBubbleAnchor(): { x: number; y: number; maxWidth: number } {
-    const pos = getAgataNpcPosition(this.scene.scale, this.zones);
-    if (this.zones.isMobile) {
-      const headY = this.root.y - this.sprite.displayHeight - 8;
-      return {
-        x: this.root.x,
-        y: headY,
-        maxWidth: this.scene.scale.width * 0.82,
-      };
-    }
-    const headY = this.root.y - this.sprite.displayHeight - 5;
-    return {
-      x: this.root.x,
-      y: headY,
-      maxWidth: pos.bubbleMaxWidth,
-    };
   }
 
   private onResize = (): void => {
@@ -270,15 +181,13 @@ export class AgataGuide {
       startNodeId: 'start',
       nodes: {
         start: {
-          id: 'start',
-          speaker: 'agata',
+          id: 'start', speaker: 'agata',
           text: `¡Cuidado! Has entrado en las ruinas del pilar de ${pillarName}. Toca una lápida para desenterrar su trágico error...`,
           nextId: 'end',
         },
         end: {
-          id: 'end',
-          speaker: 'agata',
-          text: 'Cada tumba esconde un Antídoto que necesitas. ¡Investiga!',
+          id: 'end', speaker: 'agata',
+          text: '¡Cada tumba esconde un Antídoto que necesitas. ¡Investiga!',
           options: [{ text: '💀 ¡A investigar!', nextId: '' }],
         },
       },
@@ -296,8 +205,7 @@ export class AgataGuide {
       startNodeId: 'start',
       nodes: {
         start: {
-          id: 'start',
-          speaker: 'agata',
+          id: 'start', speaker: 'agata',
           text: 'Próximamente más secretos de esta marca…',
           options: [{ text: 'Volver', nextId: 'exit' }],
         },
@@ -313,7 +221,6 @@ export class AgataGuide {
     this.breatheTween?.stop();
     this.jumpTween?.stop();
     this.walkTimer?.remove();
-    this.bubble.destroy();
     this.root.destroy();
   }
 }
