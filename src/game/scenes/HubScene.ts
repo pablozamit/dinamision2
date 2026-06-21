@@ -22,7 +22,14 @@ export class HubScene extends Phaser.Scene {
   init(data?: { pillarsCompleted?: string[] }): void {
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
-    this.introPlayed = stored ? true : false;
+    
+    // CORREGIDO: Solo saltamos la intro si REALMENTE hay pilares completados.
+    // Si es la primera vez (o solo tiene el lead guardado), la intro debe sonar.
+    if (stored && stored.pillarsCompleted && stored.pillarsCompleted.length > 0) {
+      this.introPlayed = true;
+    } else {
+      this.introPlayed = false;
+    }
   }
 
   create(): void {
@@ -132,7 +139,7 @@ export class HubScene extends Phaser.Scene {
 
   private createPortals(): void {
     const zones = getSafeZones(this.scale);
-    // Si es móvil, NO dibujamos portales en Phaser. React se encargará.
+    // CORREGIDO: Si es móvil, NO renderizamos portales en Phaser. React se encarga.
     if (zones.isMobile) {
       return; 
     }
