@@ -10,15 +10,6 @@ interface MissionIntroProps {
 
 /**
  * `MissionIntro` - Landing + captura de lead del juego.
- *
- * Flujo:
- *  1. Muestra título impactante + CTA "Comenzar la Misión"
- *  2. Al pulsar, aparece el formulario elegante (estilo `fi-`)
- *  3. Submit válido → partículas brillantes + mensaje bienvenida
- *  4. Llama a `onComplete` con el progreso persistido
- *
- * El localStorage se actualiza desde aquí para que el progreso esté
- * disponible antes de que React monte Phaser.
  */
 export default function MissionIntro({ onComplete }: MissionIntroProps) {
   const [phase, setPhase] = useState<'intro' | 'form' | 'welcome'>('intro');
@@ -33,20 +24,10 @@ export default function MissionIntro({ onComplete }: MissionIntroProps) {
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 0.5,
-      duration: 1.5 + Math.random() * 1.5,
+      duration: 1.5 + Math.random() * 1.5, // Las partículas duran hasta 3 segundos
       size: 4 + Math.random() * 8,
     })),
   );
-
-  useEffect(() => {
-    if (phase !== 'welcome') return;
-    const timer = setTimeout(() => {
-      // Transición completada → callback al padre
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [phase]);
-
-
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -63,7 +44,10 @@ export default function MissionIntro({ onComplete }: MissionIntroProps) {
     saveProgress(progress);
     setPhase('welcome');
     EventBus.emit('lead-capture-complete', progress);
-    setTimeout(() => onComplete(progress), 1600);
+    
+    // CORREGIDO: Subimos de 1600ms a 3500ms para dar tiempo a leer y permitir 
+    // que el ciclo de vida de las partículas de framer-motion termine limpiamente.
+    setTimeout(() => onComplete(progress), 3500);
   };
 
   return (
