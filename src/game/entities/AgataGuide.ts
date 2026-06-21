@@ -228,7 +228,7 @@ export class AgataGuide {
     this.root.setScale(pos.scale);
     this.sprite.setPosition(0, 0);
 
-    // CORREGIDO: Usamos displayHeight (ya escala) y subimos el factor para que el aura quede centrada en el torso/cabeza.
+    // CORREGIDO: Usamos displayHeight para que el cálculo del centro respete el scale aplicado al sprite.
     const auraRadiusFactor = this.zones.isMobile ? 0.35 : 0.4;
     this.aura.setPosition(0, -this.sprite.displayHeight * 0.55);
     this.aura.setRadius(this.sprite.displayWidth * auraRadiusFactor);
