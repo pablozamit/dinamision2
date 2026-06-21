@@ -132,9 +132,8 @@ export class HubScene extends Phaser.Scene {
 
   private createPortals(): void {
     const zones = getSafeZones(this.scale);
-    // En móviles abortamos el renderizado interno de portales de Phaser
+    // Si es móvil, NO dibujamos portales en Phaser. React se encargará.
     if (zones.isMobile) {
-      EventBus.emit('render-mobile-portals', true);
       return; 
     }
 
