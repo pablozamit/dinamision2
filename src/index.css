@@ -2172,3 +2172,95 @@
   text-align: center;
   margin-top: -4px;
 }
+
+/* ============================================
+   OVERLAY DE PORTALES MÓVIL (DOM)
+   ============================================ */
+.fi-mobile-portals-overlay {
+  position: absolute;
+  top: 135px;
+  right: 14px;
+  z-index: 15;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  width: 54%;
+  max-width: 210px;
+}
+
+.fi-mobile-portal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(20, 16, 38, 0.75);
+  border: 1.5px solid rgba(246, 160, 0, 0.35);
+  border-radius: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  backdrop-filter: blur(6px);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.fi-mobile-portal:active {
+  transform: scale(0.97);
+}
+
+.fi-mobile-portal.completed {
+  border-color: rgba(112, 88, 147, 0.6);
+  background: rgba(112, 88, 147, 0.15);
+}
+
+.fi-mobile-portal__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #0a0a1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.fi-mobile-portal__img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.fi-mobile-portal__label {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.fi-mobile-portal__badge {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Ajuste adaptativo para resoluciones móviles */
+@media (max-width: 480px) {
+  .fi-mobile-portals-overlay {
+    display: flex;
+  }
+
+  .fi-agata-dialogue {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 50% !important;
+    transform: translate(-50%, 0) !important;
+    width: 92vw !important;
+  }
+}
