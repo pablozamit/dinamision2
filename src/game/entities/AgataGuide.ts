@@ -13,9 +13,6 @@ import { buildBrandDialogue } from '../../data/buildBrandDialogue';
 
 export type AgataAnimState = 'idle' | 'jump' | 'talk' | 'walk';
 
-/**
- * Ágata como NPC: usando imágenes individuales (idle, jump).
- */
 export class AgataGuide {
   public readonly root: Phaser.GameObjects.Container;
   private readonly scene: Phaser.Scene;
@@ -36,7 +33,6 @@ export class AgataGuide {
     this.zones = getSafeZones(scene.scale);
     this.root = scene.add.container(0, 0).setDepth(80);
 
-    // Animaciones
     if (!scene.anims.exists('agata-idle-anim')) {
       scene.anims.create({
         key: 'agata-idle-anim',
@@ -96,7 +92,6 @@ export class AgataGuide {
         duration: 400,
         ease: 'Cubic.easeOut',
       });
-      // Pequena secuencia de entrada: camina 1s, luego idle
       this.playState('walk');
       this.walkTimer?.remove();
       this.walkTimer = this.scene.time.delayedCall(1000, () => {
@@ -108,7 +103,6 @@ export class AgataGuide {
     }
   }
 
-  /** Cierra el diálogo activo para permitir navegación (portales, marcas, volver). */
   public forceEndDialogue(): void {
     if (this.activeDialogue) this.endDialogue();
   }
@@ -240,14 +234,14 @@ export class AgataGuide {
     }
   }
 
+  // FIX 2: En móvil calcula la coordenada Y justa por encima de la cabeza real del personaje
   private getBubbleAnchor(): { x: number; y: number; maxWidth: number } {
     const pos = getAgataNpcPosition(this.scene.scale, this.zones);
-    // En móvil la burbuja es compacta arriba para no tapar las lápidas
-    // (deja libre la parte central/baja del playArea).
     if (this.zones.isMobile) {
+      const headY = this.root.y - this.sprite.displayHeight - 8;
       return {
-        x: this.scene.scale.width / 2,
-        y: 6,
+        x: this.root.x,
+        y: headY,
         maxWidth: this.scene.scale.width * 0.82,
       };
     }
