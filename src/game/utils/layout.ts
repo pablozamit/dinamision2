@@ -31,7 +31,6 @@ export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
   return { hudTop, agataLaneWidth, playArea, isMobile, isCoarsePointer };
 }
 
-/** Posiciones de estaciones de marca en un pilar (sala de lápidas). */
 export function getPillarStationPositions(
   playArea: Phaser.Geom.Rectangle,
   count: number,
@@ -54,23 +53,22 @@ export function getPillarStationPositions(
   return out;
 }
 
-/** NPC Ágata: columna izquierda del área de juego. */
 export function getAgataNpcPosition(
   scale: Phaser.Scale.ScaleManager,
   zones: SafeZones,
 ): { x: number; y: number; scale: number; bubbleMaxWidth: number } {
   const targetHeight = zones.isMobile
-    ? Math.min(scale.height * 0.35, 260) 
+    ? Math.min(scale.height * 0.32, 240) 
     : Math.min(scale.height * 0.42, 340);
 
   const spriteScale = targetHeight / AGATA_FRAME_HEIGHT;
 
   const x = zones.isMobile
-    ? zones.agataLaneWidth * 0.50 
+    ? zones.agataLaneWidth * 0.50
     : zones.agataLaneWidth * 0.52;
 
-  // Subimos la posición Y 35px en móvil para que el aura no se corte.
-  const y = scale.height - (zones.isMobile ? 35 : 40);
+  // Subimos la posición Y 45px en móvil para que el aura morada no se corte por el borde inferior.
+  const y = scale.height - (zones.isMobile ? 45 : 40);
 
   return {
     x,
@@ -80,7 +78,6 @@ export function getAgataNpcPosition(
   };
 }
 
-/** Portales en la zona derecha del hub principal (Desktop). */
 export function getHubPortalPositions(playArea: Phaser.Geom.Rectangle): Array<{ x: number; y: number }> {
   const cols = [0.32, 0.72];
   const rows = [0.35, 0.68];
