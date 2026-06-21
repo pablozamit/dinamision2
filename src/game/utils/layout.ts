@@ -37,8 +37,7 @@ export function getPillarStationPositions(
   count: number,
 ): Array<{ x: number; y: number }> {
   if (count <= 0) return [];
-  // CORREGIDO: Umbral subido a 350 para garantizar que en pantallas móviles reales siempre haga 1 columna y no se buggee.
-  const isMobile = playArea.width < 350;
+  const isMobile = playArea.width < 300;
   const cols = isMobile ? 1 : Math.min(count, 3);
   const rows = Math.ceil(count / cols);
   const out: Array<{ x: number; y: number }> = [];
@@ -61,17 +60,17 @@ export function getAgataNpcPosition(
   zones: SafeZones,
 ): { x: number; y: number; scale: number; bubbleMaxWidth: number } {
   const targetHeight = zones.isMobile
-    ? Math.min(scale.height * 0.32, 240) // Reducido para que el sprite quepa entero y no haga clip
+    ? Math.min(scale.height * 0.35, 260) 
     : Math.min(scale.height * 0.42, 340);
 
   const spriteScale = targetHeight / AGATA_FRAME_HEIGHT;
 
   const x = zones.isMobile
-    ? zones.agataLaneWidth * 0.50
+    ? zones.agataLaneWidth * 0.50 
     : zones.agataLaneWidth * 0.52;
 
-  // CORREGIDO: Subimos la posición Y 45px en móvil para que el aura morada no se corte por el borde inferior.
-  const y = scale.height - (zones.isMobile ? 45 : 40);
+  // Subimos la posición Y 35px en móvil para que el aura no se corte.
+  const y = scale.height - (zones.isMobile ? 35 : 40);
 
   return {
     x,
