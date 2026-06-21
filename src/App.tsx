@@ -3,7 +3,6 @@ import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
 import FinalScreen from './components/FinalScreen';
 import AgataDialogueOverlay from './components/AgataDialogueOverlay';
-import MobilePortalsOverlay from './components/MobilePortalsOverlay';
 
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
@@ -135,15 +134,6 @@ export default function App() {
         <div className="fi-game-stage">
           <PhaserGame ref={gameRef} />
           <AgataDialogueOverlay />
-
-          {phase === 'hub' && (
-            <MobilePortalsOverlay 
-              pillarsCompleted={progress?.pillarsCompleted ?? []} 
-              onPortalClick={(pillarId) => {
-                EventBus.emit('portal-entered', pillarId);
-              }}
-            />
-          )}
         </div>
       )}
 
