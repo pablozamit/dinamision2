@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
 import FinalScreen from './components/FinalScreen';
+import AgataDialogueOverlay from './components/AgataDialogueOverlay';
 
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
@@ -152,6 +153,7 @@ export default function App() {
       {(phase === 'hub' || phase === 'pillar') && (
         <div className="fi-game-stage">
           <PhaserGame ref={gameRef} />
+          <AgataDialogueOverlay />
         </div>
       )}
 
