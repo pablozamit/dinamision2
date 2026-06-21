@@ -1480,6 +1480,7 @@
   background: #0a0a1e;
   overflow: hidden;
   padding-bottom: env(safe-area-inset-bottom, 0);
+  position: relative;
 }
 
 /* Ágata dialogue overlay */
