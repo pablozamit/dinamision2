@@ -19,8 +19,7 @@ export function getSafeZones(scale: Phaser.Scale.ScaleManager): SafeZones {
     typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
   const hudTop = 0;
-  // Ajustamos el carril de Ágata para que su aura NO se corte con el borde inferior
-  const agataLaneWidth = Math.round(w * (isMobile ? 0.35 : 0.28));
+  const agataLaneWidth = Math.round(w * (isMobile ? 0.38 : 0.28));
 
   const playArea = new Phaser.Geom.Rectangle(
     agataLaneWidth + (isMobile ? 0 : PLAY_MARGIN),
@@ -38,7 +37,8 @@ export function getPillarStationPositions(
   count: number,
 ): Array<{ x: number; y: number }> {
   if (count <= 0) return [];
-  const isMobile = playArea.width < 300;
+  // CORREGIDO: Umbral subido a 350 para garantizar que en pantallas móviles reales siempre haga 1 columna y no se buggee.
+  const isMobile = playArea.width < 350;
   const cols = isMobile ? 1 : Math.min(count, 3);
   const rows = Math.ceil(count / cols);
   const out: Array<{ x: number; y: number }> = [];
@@ -61,16 +61,17 @@ export function getAgataNpcPosition(
   zones: SafeZones,
 ): { x: number; y: number; scale: number; bubbleMaxWidth: number } {
   const targetHeight = zones.isMobile
-    ? Math.min(scale.height * 0.35, 260) // Reducido ligeramente para que su base NO choque con el borde
+    ? Math.min(scale.height * 0.32, 240) // Reducido para que el sprite quepa entero y no haga clip
     : Math.min(scale.height * 0.42, 340);
 
   const spriteScale = targetHeight / AGATA_FRAME_HEIGHT;
 
   const x = zones.isMobile
-    ? zones.agataLaneWidth * 0.50 // Centrada en su carril
+    ? zones.agataLaneWidth * 0.50
     : zones.agataLaneWidth * 0.52;
 
-  const y = scale.height - (zones.isMobile ? 30 : 40); // Subida un poco para evitar el corte inferior
+  // CORREGIDO: Subimos la posición Y 45px en móvil para que el aura morada no se corte por el borde inferior.
+  const y = scale.height - (zones.isMobile ? 45 : 40);
 
   return {
     x,
