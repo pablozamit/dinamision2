@@ -26,9 +26,8 @@ export class HubScene extends Phaser.Scene {
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
     
-    // CORREGIDO: Si ya existe progreso en el almacenamiento, significa que el usuario ya se registró
-    // y está explorando el juego, por lo que bloqueamos la repetición del diálogo inicial al volver al Hub.
-    if (stored) {
+    // CORREGIDO: Evita que Ágata repita su discurso de bienvenida completo cada vez que regresas de un pilar
+    if (stored && stored.pillarsCompleted.length > 0) {
       this.introPlayed = true;
     } else {
       this.introPlayed = false;
