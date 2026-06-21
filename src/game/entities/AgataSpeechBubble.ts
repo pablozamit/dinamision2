@@ -58,8 +58,13 @@ export class AgataSpeechBubble {
     this.clearChoices();
 
     const isMobile = this.scene.scale.width <= 480;
-    this.bubbleW = Math.min(maxWidth, isMobile ? 350 : 320);
+    // Móvil: burbuja más estrecha y con tipografía menor para que no tape la 1ª lápida
+    this.bubbleW = Math.min(maxWidth, isMobile ? Math.min(this.scene.scale.width * 0.78, 300) : 320);
     this.bodyText.setWordWrapWidth(this.bubbleW - PADDING * 2);
+    // setFontSize muta sin perder fontFamily / color — más seguro que setStyle
+    this.bodyText.setFontSize(isMobile ? '12px' : '15px');
+    this.nameText.setFontSize(isMobile ? '10px' : '11px');
+    this.hintText.setFontSize(isMobile ? '10px' : '11px');
 
     this.nameText.setText('ÁGATA');
     this.bodyText.setText(node.text);
@@ -92,16 +97,18 @@ export class AgataSpeechBubble {
   }
 
   private createChoiceButton(opt: DialogueOption, index: number): Phaser.GameObjects.Text {
-    const y = PADDING + 18 + this.bodyText.height + 16 + index * 44;
+    const isMobile = this.scene.scale.width <= 480;
+    const rowH = isMobile ? 36 : 44;
+    const y = PADDING + 18 + this.bodyText.height + (isMobile ? 10 : 16) + index * rowH;
     const label = this.scene.add
       .text(PADDING, y, opt.text, {
         fontFamily: 'Montserrat, system-ui, sans-serif',
-        fontSize: '14px',
+        fontSize: isMobile ? '12px' : '14px',
         color: '#ffffff',
         backgroundColor: '#705893',
-        padding: { x: 14, y: 10 },
+        padding: { x: isMobile ? 10 : 14, y: isMobile ? 7 : 10 },
         fixedWidth: this.bubbleW - PADDING * 2,
-        wordWrap: { width: this.bubbleW - PADDING * 2 - 28 },
+        wordWrap: { width: this.bubbleW - PADDING * 2 - (isMobile ? 20 : 28) },
       })
       .setInteractive({ useHandCursor: true });
     label.on('pointerdown', (p: Phaser.Input.Pointer) => {

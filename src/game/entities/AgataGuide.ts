@@ -11,7 +11,7 @@ import { hubIntroDialogue } from '../../data/dialogueData';
 import { findBrandById } from '../../data/brandData';
 import { buildBrandDialogue } from '../../data/buildBrandDialogue';
 
-export type AgataAnimState = 'idle' | 'jump' | 'talk';
+export type AgataAnimState = 'idle' | 'jump' | 'talk' | 'walk';
 
 /**
  * Ágata como NPC: usando imágenes individuales (idle, jump).
@@ -25,6 +25,7 @@ export class AgataGuide {
   private zones: SafeZones;
   private breatheTween: Phaser.Tweens.Tween | null = null;
   private jumpTween: Phaser.Tweens.Tween | null = null;
+  private walkTimer: Phaser.Time.TimerEvent | null = null;
   private activeDialogue: BrandDialogue | null = null;
   private currentNodeId: string | null = null;
   private activeBrandId: string | null = null;
@@ -52,9 +53,18 @@ export class AgataGuide {
         repeat: 0,
       });
     }
+    if (!scene.anims.exists('agata-walk-anim')) {
+      scene.anims.create({
+        key: 'agata-walk-anim',
+        frames: scene.anims.generateFrameNumbers('agata-walk', { start: 0, end: 15 }),
+        frameRate: 14,
+        repeat: -1,
+      });
+    }
 
-    this.aura = scene.add.circle(0, 0, 90, 0xf6a000, 0.12);
-    this.aura.setStrokeStyle(2, 0xf6a000, 0.35);
+    this.aura = scene.add
+      .circle(0, 0, 40, 0x8a2be2, 0.4)
+      .setStrokeStyle(2, 0xd32f2f, 0.8);
 
     this.sprite = scene.add.sprite(0, 0, 'agata-idle');
     this.sprite.setOrigin(0.5, 1);
@@ -86,10 +96,16 @@ export class AgataGuide {
         duration: 400,
         ease: 'Cubic.easeOut',
       });
+      // Pequena secuencia de entrada: camina 1s, luego idle
+      this.playState('walk');
+      this.walkTimer?.remove();
+      this.walkTimer = this.scene.time.delayedCall(1000, () => {
+        if (!this.activeDialogue) this.playState('idle');
+      });
     } else {
       this.root.setAlpha(1);
+      this.playState('idle');
     }
-    this.playState('idle');
   }
 
   /** Cierra el diálogo activo para permitir navegación (portales, marcas, volver). */
@@ -162,9 +178,13 @@ export class AgataGuide {
   public playState(state: AgataAnimState): void {
     if (state === 'idle') {
       this.sprite.play('agata-idle-anim', true);
+      this.breatheTween?.resume();
       this.startIdleBreathing();
     } else if (state === 'jump') {
       this.jump();
+    } else if (state === 'walk') {
+      this.breatheTween?.pause();
+      this.sprite.play('agata-walk-anim', true);
     }
   }
 
@@ -222,12 +242,13 @@ export class AgataGuide {
 
   private getBubbleAnchor(): { x: number; y: number; maxWidth: number } {
     const pos = getAgataNpcPosition(this.scene.scale, this.zones);
-    // En móvil la burbuja va arriba del área de juego para no tapar a Ágata ni los portales/marcas
+    // En móvil la burbuja es compacta arriba para no tapar las lápidas
+    // (deja libre la parte central/baja del playArea).
     if (this.zones.isMobile) {
       return {
         x: this.scene.scale.width / 2,
-        y: this.zones.playArea.y + 8,
-        maxWidth: this.scene.scale.width * 0.92,
+        y: 6,
+        maxWidth: this.scene.scale.width * 0.82,
       };
     }
     const headY = this.root.y - this.sprite.displayHeight - 5;
@@ -253,14 +274,14 @@ export class AgataGuide {
         start: {
           id: 'start',
           speaker: 'agata',
-          text: `¡Bienvenida al pilar de ${pillarName}! Toca una marca para entrar en su historia.`,
+          text: `¡Cuidado! Has entrado en las ruinas del pilar de ${pillarName}. Toca una lápida para desenterrar su trágico error...`,
           nextId: 'end',
         },
         end: {
           id: 'end',
           speaker: 'agata',
-          text: 'Cada sala esconde una táctica real. ¡Explora!',
-          options: [{ text: '¡A explorar!', nextId: '' }],
+          text: 'Cada tumba esconde un Antídoto que necesitas. ¡Investiga!',
+          options: [{ text: '💀 ¡A investigar!', nextId: '' }],
         },
       },
     };
@@ -293,6 +314,7 @@ export class AgataGuide {
     this.scene.scale.off('resize', this.onResize, this);
     this.breatheTween?.stop();
     this.jumpTween?.stop();
+    this.walkTimer?.remove();
     this.bubble.destroy();
     this.root.destroy();
   }

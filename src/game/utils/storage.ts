@@ -11,7 +11,7 @@ export interface GameProgress {
   currentPillar: string | null;
 }
 
-const STORAGE_KEY = 'agatapuig-mission-progress-v1';
+const STORAGE_KEY = 'agatapuig-mission-progress-v2';
 
 /**
  * Guarda el estado del juego en localStorage.

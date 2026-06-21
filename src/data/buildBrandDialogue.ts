@@ -12,7 +12,7 @@ export function buildBrandDialogue(brand: Brand): BrandDialogue {
       intro: {
         id: 'intro',
         speaker: 'agata',
-        text: `Entremos en la historia de ${brand.name}.`,
+        text: `Acerquémonos a la lápida de ${brand.name}...`,
         nextId: 'contexto',
       },
       contexto: {
@@ -24,21 +24,21 @@ export function buildBrandDialogue(brand: Brand): BrandDialogue {
       conexion: {
         id: 'conexion',
         speaker: 'agata',
-        text: result.conexion,
+        text: `⚠️ ${result.conexion}`,
         nextId: 'tactica',
       },
       tactica: {
         id: 'tactica',
         speaker: 'agata',
-        text: result.tactica,
+        text: `💀 ${result.tactica}`,
         nextId: 'frase',
       },
       frase: {
         id: 'frase',
         speaker: 'agata',
-        text: result.fraseClave,
+        text: `🧪 ${result.fraseClave}`,
         onComplete: 'frase-clave-collected',
-        options: [{ text: 'Volver al pilar', nextId: 'exit' }],
+        options: [{ text: '💀 Recoger el Antídoto y volver', nextId: 'exit' }],
       },
     },
   };

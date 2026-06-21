@@ -24,26 +24,26 @@ export const hubIntroDialogue: BrandDialogue = {
     welcome: {
       id: 'welcome',
       speaker: 'agata',
-      text: '¡Hola! Soy Ágata. Bienvenida al Museo de la Dinamización Digital.',
+      text: '¡Ssshh! Soy Ágata... y acabas de entrar en la zona prohibida del Museo.',
       nextId: 'intro_2',
     },
     intro_2: {
       id: 'intro_2',
       speaker: 'agata',
-      text: 'Aquí descubrirás cómo las grandes marcas conectan con sus clientes de forma humana y dinámica.',
+      text: 'Esto es el Museo de los Horrores de la Dinamización Digital. Aquí yacen las marcas que lo tuvieron todo... y lo perdieron por no respetar los 4 pilares.',
       nextId: 'intro_3',
     },
     intro_3: {
       id: 'intro_3',
       speaker: 'agata',
-      text: 'Pulsa el pilar donde quieras empezar. No hace falta moverte: elige y entra directamente.',
+      text: 'Tu misión: desenterrar los 12 Antídotos ocultos en las lápidas de estas marcas caídas. Cada uno te protegerá de cometer sus mismos errores.',
       nextId: 'end',
     },
     end: {
       id: 'end',
       speaker: 'agata',
-      text: '¿Lista para empezar?',
-      options: [{ text: '¡Vamos!', nextId: '' }],
+      text: '¿Te atreves a entrar? Pulsa un portal para empezar...',
+      options: [{ text: '💀 Adelante...', nextId: '' }],
     },
   },
 };

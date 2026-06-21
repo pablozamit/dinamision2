@@ -41,7 +41,8 @@ export function getPillarStationPositions(
   count: number,
 ): Array<{ x: number; y: number }> {
   if (count <= 0) return [];
-  const cols = Math.min(count, 3);
+  const isMobile = playArea.width < 260; // Detectar falta de anchura real
+  const cols = isMobile ? 1 : Math.min(count, 3);
   const rows = Math.ceil(count / cols);
   const out: Array<{ x: number; y: number }> = [];
   for (let i = 0; i < count; i++) {
@@ -49,7 +50,9 @@ export function getPillarStationPositions(
     const row = Math.floor(i / cols);
     out.push({
       x: playArea.x + playArea.width * ((col + 1) / (cols + 1)),
-      y: playArea.y + playArea.height * (0.38 + (row / Math.max(rows, 1)) * 0.28),
+      y: playArea.y + playArea.height * (isMobile
+        ? (0.18 + (row / Math.max(rows - 1, 1)) * 0.54)
+        : (0.38 + (row / Math.max(rows, 1)) * 0.28)),
     });
   }
   return out;

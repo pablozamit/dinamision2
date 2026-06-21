@@ -27,7 +27,9 @@ export class Portal {
   private readonly icon: Phaser.GameObjects.Image;
   private readonly label: Phaser.GameObjects.Text;
   private readonly counter: Phaser.GameObjects.Text;
+  private readonly completedOverlay: Phaser.GameObjects.Text;
   private pulseTween: Phaser.Tweens.Tween | null = null;
+  private isCompleted = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -73,6 +75,15 @@ export class Portal {
     });
     this.counter.setOrigin(0.5, 0.5);
     this.container.add(this.counter);
+
+    // Completed overlay (skull) — hidden by default
+    this.completedOverlay = scene.add.text(0, 0, '💀', {
+      fontSize: '48px',
+    });
+    this.completedOverlay.setOrigin(0.5, 0.5);
+    this.completedOverlay.setAlpha(0);
+    this.completedOverlay.setDepth(10);
+    this.container.add(this.completedOverlay);
 
     if (config.locked) {
       this.applyLockedStyle();
@@ -143,6 +154,41 @@ export class Portal {
     this.icon.setAlpha(0.45);
     this.label.setColor('#888888');
     this.label.setText(`${this.config.label}\n(Próximamente)`);
+  }
+
+  /** Marca el portal como completado: oscurece todo, quita interacción, muestra calavera. */
+  public markCompleted(): void {
+    if (this.isCompleted) return;
+    this.isCompleted = true;
+
+    // Stop pulse
+    this.pulseTween?.destroy();
+    this.pulseTween = null;
+
+    // Dim everything
+    this.outerRing.setStrokeStyle(2, 0x333333, 0.3);
+    this.innerGlow.setFillStyle(0x000000, 0.5);
+    this.icon.setAlpha(0.25);
+    this.label.setColor('#555555');
+    this.counter.setAlpha(0.3);
+
+    // Show skull overlay
+    this.completedOverlay.setAlpha(0.9);
+    this.scene.tweens.add({
+      targets: this.completedOverlay,
+      scale: 1.15,
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    // Remove hitbox interactivity from container children
+    this.container.list.forEach((child) => {
+      if (child instanceof Phaser.GameObjects.Arc && (child as Phaser.GameObjects.Arc).radius === HIT_RADIUS) {
+        child.disableInteractive();
+      }
+    });
   }
 
   public setCompleted(completed: number): void {

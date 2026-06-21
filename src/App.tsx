@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
-import ProgressBar from './components/ProgressBar';
+import FinalScreen from './components/FinalScreen';
 
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
+import { pillars } from './data/brandData';
 import type { Brand } from './data/brandData';
 import './index.css';
 
@@ -25,7 +26,6 @@ type AppPhase = 'mission' | 'hub' | 'pillar' | 'final';
 export default function App() {
   const [phase, setPhase] = useState<AppPhase>('mission');
   const [progress, setProgress] = useState<GameProgress | null>(null);
-  const [activeBrand, setActiveBrand] = useState<Brand | null>(null);
   const [currentPillar, setCurrentPillar] = useState<string | null>(null);
   const gameRef = useRef<IRefPhaserGame>({ game: null, scene: null });
 
@@ -34,7 +34,11 @@ export default function App() {
     const stored = loadProgress();
     if (stored) {
       setProgress(stored);
-      setPhase('hub');
+      if (stored.pillarsCompleted.length >= 4) {
+        setPhase('final');
+      } else {
+        setPhase('hub');
+      }
     }
   }, []);
 
@@ -43,10 +47,6 @@ export default function App() {
     const onPortalEntered = (pillarId: string): void => {
       setCurrentPillar(pillarId);
       setPhase('pillar');
-    };
-
-    const onBrandSelected = (brand: Brand): void => {
-      setActiveBrand(brand);
     };
 
     const onPillarProgress = (data: { pillar: string; completed: number; total: number }): void => {
@@ -74,38 +74,69 @@ export default function App() {
       });
     };
 
+    const onPillarCompleted = (pillarId: string): void => {
+      setProgress((prev) => {
+        if (!prev) return prev;
+        if (prev.pillarsCompleted.includes(pillarId)) return prev;
+        const updated: GameProgress = {
+          ...prev,
+          pillarsCompleted: [...prev.pillarsCompleted, pillarId],
+        };
+        saveProgress(updated);
+        return updated;
+      });
+    };
+
+    const onDialogueFinished = (): void => {
+      // Phaser gestiona las transiciones de escena por sí solo.
+      // Aquí solo sincronizamos el estado de React: 'phase' lo marca
+      // 'current-scene-ready', NO este evento genérico de diálogo.
+      setCurrentPillar(null);
+    };
+
     const onSceneReady = (scene: Phaser.Scene): void => {
       const key = scene.scene.key;
       if (key === 'HubScene') {
-        setPhase('hub');
         setCurrentPillar(null);
-        setActiveBrand(null);
+        const stored = loadProgress();
+        if (stored && stored.pillarsCompleted.length >= 4) {
+          setPhase('final');
+        } else {
+          setPhase('hub');
+        }
       } else if (key === 'PillarScene') {
         setPhase('pillar');
       }
     };
 
     EventBus.on('portal-entered', onPortalEntered);
-    EventBus.on('brand-selected', onBrandSelected);
     EventBus.on('pillar-progress-updated', onPillarProgress);
     EventBus.on('frase-clave-collected', onFraseClaveCollected);
+    EventBus.on('pillar-completed', onPillarCompleted);
+    EventBus.on('dialogue-finished', onDialogueFinished);
     EventBus.on('current-scene-ready', onSceneReady);
 
     return () => {
       EventBus.off('portal-entered', onPortalEntered);
-      EventBus.off('brand-selected', onBrandSelected);
       EventBus.off('pillar-progress-updated', onPillarProgress);
       EventBus.off('frase-clave-collected', onFraseClaveCollected);
+      EventBus.off('pillar-completed', onPillarCompleted);
+      EventBus.off('dialogue-finished', onDialogueFinished);
       EventBus.off('current-scene-ready', onSceneReady);
     };
   }, []);
 
-  // Cuando entramos al hub, iniciamos HubScene
+  // Cuando entramos al hub, iniciamos HubScene (solo si Phaser no está ya en transición)
   useEffect(() => {
     const sm = gameRef.current.scene?.scene;
     if (phase !== 'hub' || !sm) return;
     if (sm.isActive('PreloadScene')) return;
-    if (!sm.isActive('HubScene')) sm.start('HubScene');
+    if (sm.isActive('HubScene')) return;
+    if (sm.isSleeping('HubScene')) {
+      sm.wake('HubScene');
+    } else {
+      sm.start('HubScene');
+    }
   }, [phase]);
 
   const handleMissionComplete = (newProgress: GameProgress): void => {
@@ -114,28 +145,18 @@ export default function App() {
     EventBus.emit('lead-capture-complete');
   };
 
-  const completedPillars = progress?.pillarsCompleted.length ?? 0;
-
   return (
     <div className="fi-app">
       {phase === 'mission' && <MissionIntro onComplete={handleMissionComplete} />}
 
       {(phase === 'hub' || phase === 'pillar') && (
         <div className="fi-game-stage">
-          <ProgressBar
-            completedPillars={completedPillars}
-            totalPillars={4}
-            currentPillar={currentPillar}
-            frasesClaveCount={progress?.frasesClave.length ?? 0}
-          />
           <PhaserGame ref={gameRef} />
         </div>
       )}
 
       {phase === 'final' && (
-        <div className="fi-screen fi-screen--final">
-          <p>Pantalla final — pendiente para slice 6</p>
-        </div>
+        <FinalScreen userName={progress?.name ?? ''} />
       )}
     </div>
   );

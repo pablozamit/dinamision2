@@ -18,6 +18,10 @@ export class PreloadScene extends Phaser.Scene {
       frameWidth: AGATA_FRAME_WIDTH,
       frameHeight: AGATA_FRAME_HEIGHT,
     });
+    this.load.spritesheet('agata-walk', '/assets/characters/agata-walk.png', {
+      frameWidth: AGATA_FRAME_WIDTH,
+      frameHeight: AGATA_FRAME_HEIGHT,
+    });
 
     for (const pillar of pillars) {
       const asset = PILLAR_ASSETS[pillar.id as keyof typeof PILLAR_ASSETS];
@@ -25,6 +29,11 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image(`pillar-icon-${pillar.id}`, asset.icon);
       }
     }
+
+    // Audio SFX/VFX
+    this.load.audio('ambient-horror', '/assets/audio/ambient.wav');
+    this.load.audio('thunder', '/assets/audio/thunder.wav');
+    this.load.audio('stone', '/assets/audio/stone.wav');
   }
 
   create(): void {

@@ -24,3 +24,25 @@ dist-ssr
 *.sw?
 .vite-source-tags.js
 .vercel
+
+# Local agent / dev state (no subir al repo)
+.firebase/
+.herenow/
+mcps/
+terminals/
+
+# Windows / shell artifacts
+nul
+
+# Capturas locales de tests visuales
+.hud-*.png
+.mobile-*.png
+
+# Versiones antiguas locales de scaffolding
+tmp_*.tsx
+tmp_*.ts
+tmp_*.css
+
+# Duplicados de sprites con diacrítico en raíz
+ágata-idle.png
+ágata-jump.png

@@ -23,8 +23,8 @@ export default function ProgressBar({
     <header className="fi-hud">
       <div className="fi-hud__topband">
         <h1 className="fi-hud__title">
-          <span className="fi-hud__title-full">Museo de la Dinamización</span>
-          <span className="fi-hud__title-short">Museo · Dinamización</span>
+          <span className="fi-hud__title-full">Museo de los Horrores</span>
+          <span className="fi-hud__title-short">Horrores · Dinamización</span>
         </h1>
         <span className="fi-hud__percent" aria-label={`Progreso ${percentage} por ciento`}>
           {percentage}%
@@ -62,9 +62,9 @@ export default function ProgressBar({
       </div>
 
       <div className="fi-hud__desktop-extra" aria-hidden="true">
-        <p className="fi-hud__subtitle fi-hud__mobile-hide">4 pilares · experiencia guiada</p>
+        <p className="fi-hud__subtitle fi-hud__mobile-hide">4 criptas · 12 antídotos</p>
         <div className="fi-hud__meta">
-          <span className="fi-hud__frases fi-hud__mobile-hide">{frasesClaveCount} frases clave</span>
+          <span className="fi-hud__frases fi-hud__mobile-hide">{frasesClaveCount} antídotos</span>
           <div className="fi-hud__bar-track">
             <motion.div
               className="fi-hud__bar-fill"

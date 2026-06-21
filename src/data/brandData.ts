@@ -23,47 +23,37 @@ export const pillars: PillarData[] = [
   {
     id: 'gamification',
     name: 'GAMIFICACIÓN',
-    color: 0x3a7bd5,
-    glowColor: 0x6ec6ff,
+    color: 0x4a1a6b,
+    glowColor: 0x9b59b6,
     brands: [
       {
-        id: 'ikea',
-        name: 'IKEA',
+        id: 'foursquare',
+        name: 'Foursquare',
         result: {
-          contexto:
-            'Transformó tareas rutinarias como el montaje de muebles en un juego digital colaborativo donde los puntos acumulados se cambian por descuentos y ventajas reales.',
-          conexion:
-            'Conecta con el "Efecto IKEA": un patrón psicológico por el cual valoramos un 1000% más aquello en lo que invertimos nuestro propio esfuerzo físico y mental.',
-          tactica:
-            'Creación de una dinámica interactiva donde los clientes juegan a diseñar y montar digitalmente, convirtiendo la pereza del proceso en un activo de compra.',
-          fraseClave: '"No vendes muebles, vendes la sensación de haber creado algo tuyo".',
+          contexto: "Foursquare nació como una aplicación móvil de geolocalización donde los usuarios hacían 'check-in' en lugares reales para competir por 'alcaldías', un título honorífico otorgado de forma lúdica a quien más veces visitaba un local.",
+          conexion: "Su estrategia fracasó cuando decidieron dividir la app y eliminar por completo estas mecánicas de juego originales y las medallas virtuales que mantenían el interés y la competencia activa entre los usuarios.",
+          tactica: "Al quitar el incentivo del juego y la visibilidad del progreso, transformaron una experiencia social altamente adictiva en una utilidad plana y aburrida, provocando la migración masiva de su audiencia.",
+          fraseClave: '"ANTÍDOTO: Nunca elimines las mecánicas que enganchan a tu tribu. Si necesitas evolucionar, añade capas nuevas sin destruir el núcleo lúdico que generó la adicción original".',
         },
       },
       {
-        id: 'starbucks',
-        name: 'Starbucks',
+        id: 'klout',
+        name: 'Klout',
         result: {
-          contexto:
-            'Transformó la tarjeta de puntos tradicional en un sistema de misiones y retos en la aplicación móvil para coleccionar sellos digitales.',
-          conexion:
-            'Abre pequeños huecos de curiosidad en el cerebro del cliente y activa la necesidad psicológica de progreso visible.',
-          tactica:
-            'Diseño de desafíos semanales aleatorios (como probar tres granos distintos) para desbloquear recetas ocultas y estatus de cliente privilegiado.',
-          fraseClave: '"La gamificación bien hecha no se siente como un juego, se siente como un privilegio".',
+          contexto: "Klout fue una plataforma diseñada para medir la influencia online de las personas otorgando una puntuación pública del 1 al 100 basada en su actividad y alcance en redes sociales.",
+          conexion: "El error fatal en su estrategia de gamificación fue crear mecánicas opacas y algoritmos cambiantes que generaban frustración y una enorme ansiedad social en lugar de un sentimiento de logro positivo.",
+          tactica: "Al ser percibida por la comunidad como una herramienta de fiscalización y castigo psicológico más que como un juego de progreso sano, el descontento destruyó su reputación y arrastró a la marca hasta su cierre definitivo.",
+          fraseClave: '"ANTÍDOTO: La gamificación debe generar orgullo y logro, nunca ansiedad. Si tu sistema de puntos humilla en lugar de motivar, estás cavando tu propia tumba".',
         },
       },
       {
-        id: '8belts',
-        name: '8Belts',
+        id: 'subway',
+        name: 'Subway',
         result: {
-          contexto:
-            'Revolucionó la retención de alumnos en la enseñanza de idiomas implementando un sistema lúdico de onboarding de alta intensidad durante los primeros 15 días.',
-          conexion:
-            'Ataca la resistencia inicial creando un pico de dopamina y logro temprano que frena en seco el deseo subconsciente de abandonar el programa.',
-          tactica:
-            'Establecimiento de mecánicas lúdicas de impacto inmediato en la fase de bienvenida del servicio para reducir drásticamente las bajas y devoluciones.',
-          fraseClave:
-            '"El destino de un cliente se decide en los primeros quince días; hazlo una aventura interactiva y se quedará de por vida".',
+          contexto: "La cadena de comida rápida Subway basaba la fidelidad de sus clientes en una exitosa tarjeta física donde coleccionabas sellos con cada compra hasta completar un panel y obtener un bocadillo gratis.",
+          conexion: "Su caída ocurrió al sustituir bruscamente este sistema por un complejo programa digital que eliminaba por completo el feedback inmediato y la recompensa rápida en el mostrador.",
+          tactica: "Al convertir la acumulación de ventajas en un proceso tedioso, confuso y sin un camino lúdico claro, los consumidores habituales sintieron que su esfuerzo ya no valía la pena y abandonaron la marca.",
+          fraseClave: '"ANTÍDOTO: La recompensa debe sentirse inmediata y tangible. Si conviertes un sistema simple y adictivo en un laberinto digital, perderás la confianza ganada".',
         },
       },
     ],
@@ -71,46 +61,37 @@ export const pillars: PillarData[] = [
   {
     id: 'acompanamiento',
     name: 'ACOMPAÑAMIENTO',
-    color: 0x4caf50,
-    glowColor: 0x80e27e,
+    color: 0x1a3a2b,
+    glowColor: 0x27ae60,
     brands: [
       {
-        id: 'duolingo',
-        name: 'Duolingo',
+        id: 'udacity',
+        name: 'Udacity',
         result: {
-          contexto:
-            'Empareja a los usuarios con un amigo cada semana para superar un reto juntos y evitar perder la racha mediante el compromiso social.',
-          conexion:
-            'Demuestra que el acompañamiento no consiste en vigilar ni fiscalizar al usuario, sino en activar la responsabilidad compartida para eliminar la soledad.',
-          tactica:
-            'Lanzamiento de misiones conjuntas por parejas semanales apoyadas en notificaciones empáticas y alertas de racha comunitaria.',
-          fraseClave: '"El mejor acompañamiento hace que tu cliente sienta que abandonarte sería abandonar a un amigo".',
+          contexto: "Udacity nació como una de las grandes plataformas pioneras de educación online abierta (MOOC), ofreciendo cursos especializados en tecnología desarrollados por los mejores expertos del sector.",
+          conexion: "Su estrategia inicial fracasó estrepitosamente, sufriendo tasas de abandono superiores al 95%, porque se limitaron a empaquetar y vender vídeos de alta calidad, dejando al alumno completamente solo y aislado frente a la pantalla.",
+          tactica: "Comprendieron tarde que el contenido sin una guía humana es inútil, viéndose obligados a refundar todo su modelo para incorporar mentores y dinámicas de rendición de cuentas que sostuvieran al estudiante.",
+          fraseClave: '"ANTÍDOTO: El mejor contenido del mundo no vale nada sin acompañamiento humano. Diseña siempre un sistema de soporte que sostenga al usuario en los momentos de flaqueza".',
         },
       },
       {
-        id: 'nike',
-        name: 'Nike',
+        id: 'fitbit',
+        name: 'Fitbit',
         result: {
-          contexto:
-            'Incluye en su aplicación voces de entrenadores reales que te hablan al oído como si fueran amigos íntimos para que no abandones la meta.',
-          conexion:
-            'Cambia el foco de la autocompetición fría hacia una transformación identitaria guiada y profundamente empática.',
-          tactica:
-            'Integración en Nike Run Club de planes personalizados y audio coaching emocional enfocado en sostener al usuario en los momentos de fatiga.',
-          fraseClave: '"Cuando acompañas la transformación, tu producto deja de ser un gasto y se convierte en inversión".',
+          contexto: "Fitbit revolucionó el mercado tecnológico con sus pulseras inteligentes diseñadas para registrar la actividad física diaria, monitorizar los pasos y medir el rendimiento corporal de los usuarios.",
+          conexion: "Su debilidad radicó en limitar su estrategia a un hardware que arrojaba métricas y datos biológicos fríos, sin ofrecer una verdadera guía humana sobre hábitos de salud.",
+          tactica: "Al no sostener de forma empática al usuario en los momentos de fatiga ni enseñarle qué hacer con esos números, millones de dispositivos terminaron abandonados en cajones a los pocos meses.",
+          fraseClave: '"ANTÍDOTO: Los datos sin contexto humano son ruido. Transforma cada métrica en una conversación empática que guíe al usuario hacia su siguiente paso".',
         },
       },
       {
-        id: 'clubvida10',
-        name: 'Club Vida 10',
+        id: 'googleglass',
+        name: 'Google Glass',
         result: {
-          contexto:
-            'Transformó un curso tradicional de hábitos saludables en una comunidad viva donde las alumnas se rinden cuentas y se apoyan mutuamente.',
-          conexion:
-            'Combate de raíz el aislamiento crónico del alumno en el entorno digital mediante la creación de redes de soporte íntimo a largo plazo.',
-          tactica:
-            'Diseño estratégico de dinámicas de "accountability partners" y retos semanales cruzados para generar adherencia real al servicio.',
-          fraseClave: '"Acompañar no es dar información técnica; acompañar es dar un espacio humano de pertenencia".',
+          contexto: "Google Glass fue el ambicioso proyecto de gafas de realidad aumentada desarrollado por Google para integrar la navegación por internet y las notificaciones digitales directamente en la línea de visión del usuario.",
+          conexion: "La marca fracasó de forma frontal al lanzar este producto disruptivo al mercado masivo sin diseñar ningún protocolo de bienvenida ni acompañamiento social para mitigar los miedos del entorno.",
+          tactica: "Al dejar a los primeros compradores completamente solos e indefensos ante la sospecha de privacidad de los demás, el producto generó un estigma y rechazo social tan agresivo que arruinó la reputación del proyecto.",
+          fraseClave: '"ANTÍDOTO: Un producto disruptivo necesita un onboarding social, no solo técnico. Acompaña a tu usuario ante el mundo, no solo ante la pantalla".',
         },
       },
     ],
@@ -118,46 +99,37 @@ export const pillars: PillarData[] = [
   {
     id: 'celebracion',
     name: 'CELEBRACIÓN',
-    color: 0xf6a000,
-    glowColor: 0xffd54f,
+    color: 0x6b1a1a,
+    glowColor: 0xc0392b,
     brands: [
       {
-        id: 'spotify',
-        name: 'Spotify',
+        id: 'ratners',
+        name: 'Ratners Group',
         result: {
-          contexto:
-            'Transforma los datos de uso de todo un año en diapositivas coloridas y un juego visual que celebra tu "estado de ánimo musical" con su Wrapped.',
-          conexion:
-            'Activa la celebración de la identidad, logrando que el usuario se sienta el héroe y protagonista absoluto de la historia de la marca.',
-          tactica:
-            'Despliegue anual de un resumen interactivo hiper-personalizado optimizado de forma nativa para ser compartido en canales sociales.',
-          fraseClave: '"La mejor celebración no es premiar al cliente, es devolverle su propia historia".',
+          contexto: "Ratners Group era el mayor gigante de la joyería masiva en el Reino Unido, un imperio comercial que basaba su éxito en vender piezas accesibles para celebrar momentos especiales de la clase trabajadora.",
+          conexion: "Su consejero delegado destruyó la compañía en un solo día al declarar públicamente en una conferencia que sus propios productos eran 'basura barata' y que sus pendientes duraban menos que un sándwich.",
+          tactica: "Esta brutal anti-celebración maltrató de forma directa el orgullo de su clientela, destruyendo la confianza en la marca e infligiendo una caída inmediata de 500 millones de libras en su valor de mercado.",
+          fraseClave: '"ANTÍDOTO: Jamás humilles el orgullo de tu cliente. Si él celebra tu producto, tú celebras su elección. Romper esa alianza es destruir tu negocio".',
         },
       },
       {
-        id: 'mastercard',
-        name: 'Mastercard',
+        id: 'netflix_horror',
+        name: 'Netflix',
         result: {
-          contexto:
-            'Crea experiencias que juegan con los cinco sentidos, como un sonido característico al pagar o clases de repostería en directo bajo el concepto Priceless.',
-          conexion:
-            'Apela al subconsciente asociando el acto transaccional con momentos memorables e invaluables de felicidad y autorrealización.',
-          tactica:
-            'Desarrollo de una plataforma de recompensas sensoriales y accesos exclusivos a eventos únicos imposibles de comprar con dinero.',
-          fraseClave: '"Cuando celebras a tu cliente con algo invaluable, tu marca se vuelve invaluable".',
+          contexto: "Netflix vivió una de sus crisis reputacionales más severas al anunciar por sorpresa la separación de sus servicios de alquiler de DVD y streaming bajo una nueva marca llamada Qwikster.",
+          conexion: "En lugar de celebrar, premiar y cuidar la veteranía de su base de suscriptores más leales, la directiva penalizó su permanencia obligándolos a sufrir un aumento de precio del 60% y una incómoda doble facturación.",
+          tactica: "Al maltratar la lealtad del cliente en lugar de festejarla, la marca sufrió la baja fulminante de 800.000 usuarios en tres meses.",
+          fraseClave: '"ANTÍDOTO: Tus clientes más antiguos merecen ser premiados, no penalizados. Cada cambio de precio debe ir envuelto en una celebración de su lealtad".',
         },
       },
       {
-        id: 'volkswagen',
-        name: 'Volkswagen',
+        id: 'blockbuster',
+        name: 'Blockbuster',
         result: {
-          contexto:
-            'Lanzó el proyecto "Speed Camera Lottery" en Suecia, utilizando el dinero de las multas de tráfico para sortear un premio en metálico entre los conductores que respetaban el límite.',
-          conexion:
-            'Sustituye el castigo tradicional por una dinámica de motivación positiva, sentimiento de logro inmediato y expectativa de recompensa.',
-          tactica:
-            'Campaña interactiva "The Fun Theory" en radares reales, logrando reducir la velocidad media de circulación en un 22% de forma totalmente voluntaria.',
-          fraseClave: '"Premiar el comportamiento correcto engancha diez veces más que castigar el error".',
+          contexto: "Blockbuster dominó de forma absoluta el mercado internacional de alquiler de películas físicas en videoclubes gracias a una gigantesca red de tiendas y un catálogo imbatible.",
+          conexion: "Su estrategia comercial condenó su futuro al basar una parte masiva de sus ingresos anuales en penalizar económicamente a sus clientes mediante recargos abusivos por retrasos en las devoluciones.",
+          tactica: "Al estructurar su rentabilidad sobre el castigo del error del usuario en lugar de celebrar y premiar su recurrencia, la marca cavó su propia fosa en cuanto apareció una alternativa que eliminaba esa fricción.",
+          fraseClave: '"ANTÍDOTO: Nunca bases tu modelo de negocio en castigar al cliente. La rentabilidad sostenible nace de premiar la recurrencia, no de penalizar el error".',
         },
       },
     ],
@@ -165,47 +137,37 @@ export const pillars: PillarData[] = [
   {
     id: 'comunidad',
     name: 'COMUNIDAD Y CO-CREACIÓN',
-    color: 0xe91e63,
-    glowColor: 0xff6090,
+    color: 0x1a1a4b,
+    glowColor: 0x3498db,
     brands: [
       {
-        id: 'netflix',
-        name: 'Netflix',
+        id: 'digg',
+        name: 'Digg',
         result: {
-          contexto:
-            'Monta réplicas físicas e inmersivas de los escenarios de sus series para que los fans jueguen y se hagan fotos, convirtiéndolos en difusores de la marca.',
-          conexion:
-            'Transforma al consumidor pasivo en un co-creador activo de contenido y difusor orgánico del universo de la marca.',
-          tactica:
-            'Activación de escenografías efímeras y experiencias interactivas en el mundo real conectadas con dinámicas digitales.',
-          fraseClave: '"Dale a tu comunidad un escenario épico y ellos se encargarán de expandir tu imperio".',
+          contexto: "Digg fue el agregador de noticias más influyente del planeta, una plataforma donde la portada del sitio era co-creada de forma orgánica por los usuarios mediante un sistema democrático de votación de enlaces.",
+          conexion: "La marca cayó en la irrelevancia absoluta al lanzar un rediseño que eliminaba estas herramientas de control comunitario para priorizar los contenidos patrocinados de grandes corporaciones de medios.",
+          tactica: "Al silenciar a su propia tribu y destruir el poder de la co-creación, los usuarios se sintieron traicionados y emigraron en masa hacia Reddit en cuestión de días, extinguiendo el negocio.",
+          fraseClave: '"ANTÍDOTO: La comunidad que co-crea tu producto es tu activo más valioso. Si la silencias para monetizar, no perderás usuarios: perderás el alma de tu marca".',
         },
       },
       {
-        id: 'lego',
-        name: 'LEGO',
+        id: 'tumblr',
+        name: 'Tumblr',
         result: {
-          contexto:
-            'Une el juego físico y el digital mediante una dinámica familiar que usa la cámara del móvil para buscar piezas virtuales ocultas entre los bloques reales.',
-          conexion:
-            'Une dos identidades en un mismo espacio de co-creación: el niño que explora jugando y el adulto nostálgico que reconecta con su familia.',
-          tactica:
-            'Lanzamiento de la plataforma LEGO Insiders donde la propia comunidad propone, vota y decide los próximos sets que la empresa fabricará de forma oficial.',
-          fraseClave: '"Una marca verdaderamente amada es una marca que ha sido co-creada por su propia tribu".',
+          contexto: "Tumblr se consolidó como una plataforma de microblogueo única en internet, un ecosistema seguro donde millones de usuarios co-creaban la identidad de la red mediante arte, contenido visual y blogs de nicho.",
+          conexion: "La directiva destruyó más del 30% del tráfico global de la noche a la mañana al prohibir de forma abrupta todo el contenido adulto sin consultar ni involucrar a su base de creadores.",
+          tactica: "Al atacar directamente las raíces del espacio de expresión libre co-creado por su propia tribu, la marca rompió el vínculo de confianza, provocando un éxodo irreversible.",
+          fraseClave: '"ANTÍDOTO: Antes de cambiar las reglas del juego, consulta a tu tribu. Una decisión impuesta sin diálogo destruye la confianza más rápido que cualquier error técnico".',
         },
       },
       {
-        id: 'yamaha',
-        name: 'Yamistar Yamaha',
+        id: 'blackberry',
+        name: 'BlackBerry',
         result: {
-          contexto:
-            'Eliminó las barreras de acceso regalando unas plantillas de cartón sencillas para convertirlas en gafas de realidad virtual caseras con el propio teléfono.',
-          conexion:
-            'Quita el freno económico y tecnológico haciendo sentir al fan de a pie que está metido dentro del box del equipo de carreras.',
-          tactica:
-            'Dinámica híbrida de co-creación analógica (diseño de cartón) para consumir contenidos inmersivos premium de forma masiva.',
-          fraseClave:
-            '"La alta tecnología por sí sola no genera pertenencia; la sencillez compartida y accesible, sí".',
+          contexto: "BlackBerry lideró de forma absoluta el mercado de la telefonía móvil profesional gracias a sus dispositivos con teclado físico y su sistema cerrado de mensajería instantánea enfocado en la seguridad corporativa.",
+          conexion: "La marca perdió todo su pastel de mercado al cerrarse por completo a la co-creación externa de aplicaciones y software que demandaba su comunidad de desarrolladores y usuarios.",
+          tactica: "Al ignorar la evolución cultural de su tribu, que pedía pantallas táctiles modernas y un ecosistema abierto, su insistencia obstinada los aisló por completo del mercado hasta su total desaparición.",
+          fraseClave: '"ANTÍDOTO: Escucha lo que tu comunidad te pide antes de que sea tarde. Un ecosistema cerrado es una tumba con fecha de caducidad".',
         },
       },
     ],

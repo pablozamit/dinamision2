@@ -10,6 +10,7 @@ export class RoomScene extends Phaser.Scene {
   private pillarId!: string;
   private playBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
   private exitHint: Phaser.GameObjects.Text | null = null;
+  private pillarCompletedEmitted = false;
 
   constructor() {
     super({ key: 'RoomScene' });
@@ -35,8 +36,9 @@ export class RoomScene extends Phaser.Scene {
 
     EventBus.on('dialogue-finished', this.onDialogueFinished, this);
     EventBus.on('dialogue-exit-request', this.exitRoom, this);
+    EventBus.on('frase-clave-collected', this.onFraseClaveCollected, this);
 
-    this.cameras.main.setBackgroundColor('#050510');
+    this.cameras.main.setBackgroundColor('#080408');
     this.cameras.main.fadeIn(500, 0, 0, 0);
     this.scale.on('resize', this.onResize, this);
 
@@ -51,7 +53,7 @@ export class RoomScene extends Phaser.Scene {
         .text(width / 2, zones.hudTop + 6, this.brand.name, {
           fontSize: '13px',
           fontFamily: 'Montserrat, system-ui, sans-serif',
-          color: '#aaaaaa',
+          color: '#887799',
         })
         .setOrigin(0.5, 0);
     }
@@ -60,8 +62,8 @@ export class RoomScene extends Phaser.Scene {
     for (let i = 0; i < slots; i++) {
       const x = this.playBounds.x + (this.playBounds.width / (slots + 1)) * (i + 1);
       const y = this.playBounds.y + this.playBounds.height * 0.42;
-      const rect = this.add.rectangle(x, y, 100, 130, 0x1a1a3a, 0.45);
-      rect.setStrokeStyle(2, 0x3a3a6a, 0.8);
+      const rect = this.add.rectangle(x, y, 100, 130, 0x1a0a2a, 0.45);
+      rect.setStrokeStyle(2, 0x3a1a4a, 0.8);
       this.tweens.add({
         targets: rect,
         alpha: 0.75,
@@ -76,7 +78,7 @@ export class RoomScene extends Phaser.Scene {
     const x = this.playBounds.right - 12;
     const y = this.playBounds.y + (zones.isMobile ? 6 : 12);
     const btn = this.add
-      .text(x, y, '← Pilar', {
+      .text(x, y, '← Cripta', {
         fontSize: '13px',
         fontFamily: 'Montserrat, system-ui, sans-serif',
         color: '#fff',
@@ -104,9 +106,15 @@ export class RoomScene extends Phaser.Scene {
 
   private onDialogueFinished = (): void => {
     if (this.exitHint) {
-      this.exitHint.setText('Pulsa ← Pilar para volver');
+      this.exitHint.setText('Pulsa ← Cripta para volver');
       this.exitHint.setVisible(true);
     }
+  };
+
+  private onFraseClaveCollected = (): void => {
+    if (this.pillarCompletedEmitted) return;
+    this.pillarCompletedEmitted = true;
+    EventBus.emit('pillar-completed', this.pillarId);
   };
 
   private onResize = (): void => {
@@ -125,6 +133,7 @@ export class RoomScene extends Phaser.Scene {
   shutdown(): void {
     EventBus.off('dialogue-finished', this.onDialogueFinished, this);
     EventBus.off('dialogue-exit-request', this.exitRoom, this);
+    EventBus.off('frase-clave-collected', this.onFraseClaveCollected, this);
     this.scale.off('resize', this.onResize, this);
     this.agata?.destroy();
     this.agata = null;

@@ -8,24 +8,24 @@ export default function FinalScreen({ userName }: FinalScreenProps) {
       <div className="fi-final-inner">
         <div className="fi-final-icon-wrap">
           <svg className="fi-final-icon" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="30" stroke="#705893" strokeWidth="2" strokeDasharray="4 3" />
-            <path d="M22 32l7 7 13-14" stroke="#f6a000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="32" cy="32" r="30" stroke="#8a2be2" strokeWidth="2" strokeDasharray="4 3" />
+            <text x="32" y="38" textAnchor="middle" fill="#d32f2f" fontSize="28">💀</text>
           </svg>
         </div>
-        <p className="fi-final-pretitle">{userName}, has completado el test</p>
+        <p className="fi-final-pretitle">{userName}, has sobrevivido al Museo de los Horrores</p>
         <h2 className="fi-final-title">
-          Ya conoces el <span className="fi-text-gold">QUÉ</span>...
+          Ya conoces los <span className="fi-text-gold">ERRORES</span> que destruyeron imperios...
           <br />
-          pero conocer el QUÉ no es lo mismo que
+          pero conocer el error no es lo mismo que
           <br />
-          dominar el <span className="fi-text-gold">CÓMO</span>
+          dominar el <span className="fi-text-gold">ANTÍDOTO</span>
         </h2>
         <div className="fi-final-divider" />
         <p className="fi-final-text">
-          Has visto cómo IKEA, Starbucks, Duolingo o Spotify aplican los 3 pilares de la
-          dinamización digital. Pero verlo no es implementarlo. El Experto Universitario en
-          Dinamización Digital te da el sistema completo, las plantillas y el acompañamiento
-          para que tu marca también lo logre.
+          Has visto cómo Foursquare, Netflix, BlackBerry o Blockbuster cayeron por ignorar los
+          4 pilares de la dinamización digital. Pero ver sus tumbas no es suficiente. El Experto
+          Universitario en Dinamización Digital te da el sistema completo, las plantillas y el
+          acompañamiento para que tu marca no acabe en este cementerio.
         </p>
         <a
           href="https://agatapuig.com/experto-universitario-en-dinamizacion-digital-2025/"
