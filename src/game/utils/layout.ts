@@ -48,8 +48,10 @@ export function getPillarStationPositions(
     const col = i % cols;
     const row = Math.floor(i / cols);
     
+    // CORREGIDO: En móvil, desplazamos la columna de lápidas ligeramente al 62% del ancho 
+    // para dejar el lado izquierdo totalmente libre para el sprite de Ágata.
     const posX = isMobile 
-      ? w * 0.56 
+      ? w * 0.62 
       : playArea.x + playArea.width * ((col + 1) / (cols + 1));
 
     out.push({
@@ -94,12 +96,13 @@ export function getHubPortalPositions(playArea: Phaser.Geom.Rectangle): Array<{ 
   const h = playArea.height + PLAY_MARGIN * 2;
 
   if (isMobile) {
-    // FIX 1: Columnas unificadas simétricamente a [0.25, 0.75] y filas a [0.28, 0.65] sobre el ancho real total
+    // CORREGIDO: Ubicamos los 4 portales en la mitad derecha e inferior de la pantalla móvil.
+    // Esto deja la parte superior libre para el diálogo de React y la parte inferior izquierda libre para Ágata.
     return [
-      { x: w * 0.25, y: h * 0.28 }, // Gamificación
-      { x: w * 0.75, y: h * 0.28 }, // Acompañamiento
-      { x: w * 0.25, y: h * 0.65 }, // Celebración
-      { x: w * 0.75, y: h * 0.65 }, // Comunidad y Co-creación
+      { x: w * 0.46, y: h * 0.44 }, // Gamificación (Fila 1 - Izquierda)
+      { x: w * 0.82, y: h * 0.44 }, // Acompañamiento (Fila 1 - Derecha)
+      { x: w * 0.46, y: h * 0.74 }, // Celebración (Fila 2 - Izquierda)
+      { x: w * 0.82, y: h * 0.74 }, // Comunidad y Co-creación (Fila 2 - Derecha)
     ];
   } else {
     const cols = [0.32, 0.72];
