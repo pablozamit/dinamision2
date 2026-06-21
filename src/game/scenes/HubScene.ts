@@ -23,10 +23,16 @@ export class HubScene extends Phaser.Scene {
   }
 
   init(data?: { pillarsCompleted?: string[] }): void {
-    // La escena se reutiliza: permitir volver a mostrar Ágata e intro
-    this.introPlayed = false;
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
+    
+    // CORREGIDO: Si ya existe progreso en el almacenamiento, significa que el usuario ya se registró
+    // y está explorando el juego, por lo que bloqueamos la repetición del diálogo inicial al volver al Hub.
+    if (stored) {
+      this.introPlayed = true;
+    } else {
+      this.introPlayed = false;
+    }
   }
 
   create(): void {
@@ -41,8 +47,6 @@ export class HubScene extends Phaser.Scene {
     this.agata.showCharacter();
 
     EventBus.on('lead-capture-complete', this.startIntro, this);
-    EventBus.on('dialogue-started', this.hidePortals, this);
-    EventBus.on('dialogue-finished', this.showPortals, this);
     this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
@@ -59,7 +63,7 @@ export class HubScene extends Phaser.Scene {
 
     this.scheduleLightning();
 
-    // NUEVO: Registra el limpiador para que se ejecute al salir de esta pantalla
+    // Registra el limpiador para que se ejecute al salir de esta pantalla
     this.events.once('shutdown', this.shutdown, this);
 
     EventBus.emit('current-scene-ready', this);
@@ -159,14 +163,6 @@ export class HubScene extends Phaser.Scene {
     });
   };
 
-  private hidePortals = (): void => {
-    this.portals.forEach(p => p.container.setVisible(false));
-  };
-
-  private showPortals = (): void => {
-    this.portals.forEach(p => p.container.setVisible(true));
-  };
-
   private handlePortalClick(pillarId: PillarId): void {
     this.agata?.forceEndDialogue();
     this.enterPortal(pillarId);
@@ -184,8 +180,6 @@ export class HubScene extends Phaser.Scene {
     this.scale.off('resize', this.onResize, this);
     this.events.off('portal-clicked', this.handlePortalClick, this);
     EventBus.off('lead-capture-complete', this.startIntro, this);
-    EventBus.off('dialogue-started', this.hidePortals, this);
-    EventBus.off('dialogue-finished', this.showPortals, this);
     if (this.lightningTimer) this.lightningTimer.remove();
     this.agata?.destroy();
     this.agata = null;
