@@ -137,8 +137,10 @@ export default function App() {
       {(phase === 'hub' || phase === 'pillar') && (
         <div className="fi-game-stage">
           <PhaserGame ref={gameRef} />
+          {/* CORREGIDO: El overlay ahora está dentro del stage y se renderiza en ambas fases */}
           <AgataDialogueOverlay />
-          {/* CORREGIDO: Overlay responsivo activado en el Hub para que los portales no se solapen en móvil */}
+          
+          {/* CORREGIDO: Overlay responsivo activado solo en el Hub para evitar solapamientos en móvil */}
           {phase === 'hub' && (
             <MobilePortalsOverlay 
               pillarsCompleted={progress?.pillarsCompleted ?? []} 
