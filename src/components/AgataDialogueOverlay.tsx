@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { EventBus } from '../game/EventBus';
 import type { BrandDialogue, DialogueNode } from '../data/dialogueData';
 import { hubIntroDialogue } from '../data/dialogueData';
@@ -13,6 +13,12 @@ interface DialogueState {
 
 export default function AgataDialogueOverlay() {
   const [state, setState] = useState<DialogueState | null>(null);
+  // Ref para mantener el estado actual dentro de los listeners sin reiniciarlos
+  const stateRef = useRef<DialogueState | null>(null);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const startDialogue = useCallback((dialogue: BrandDialogue, brandId: string | null = null) => {
     setState({ dialogue, nodeId: dialogue.startNodeId, brandId });
@@ -74,13 +80,14 @@ export default function AgataDialogueOverlay() {
       });
     };
 
-    // Listener de seguridad: si Phaser cambia de escena, cerramos el diálogo forzosamente.
+    // Listener de seguridad blindado con ref: si Phaser cambia de escena, cerramos forzosamente.
     const onSceneReady = () => {
-      if (state) {
+      if (stateRef.current) {
         setState(null);
       }
     };
 
+    // Array de dependencias VACÍO: los listeners se montan SOLO UNA VEZ.
     EventBus.on('start-hub-intro', onHubIntro);
     EventBus.on('start-pillar-intro', onPillarIntro);
     EventBus.on('start-brand-dialogue', onBrandDialogue);
@@ -92,7 +99,7 @@ export default function AgataDialogueOverlay() {
       EventBus.off('start-brand-dialogue', onBrandDialogue);
       EventBus.off('current-scene-ready', onSceneReady);
     };
-  }, [startDialogue, state]);
+  }, [startDialogue]);
 
   useEffect(() => {
     if (!state) return;
