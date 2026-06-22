@@ -23,7 +23,7 @@ export class HubScene extends Phaser.Scene {
     const stored = loadProgress();
     this.pillarsCompleted = data?.pillarsCompleted ?? stored?.pillarsCompleted ?? [];
     
-    // Solo saltamos la intro si REALMENTE hay pilares completados.
+    // CORREGIDO: Solo saltamos la intro si REALMENTE hay pilares completados.
     if (stored && stored.pillarsCompleted && stored.pillarsCompleted.length > 0) {
       this.introPlayed = true;
     } else {
@@ -43,7 +43,7 @@ export class HubScene extends Phaser.Scene {
     this.agata.showCharacter();
 
     EventBus.on('lead-capture-complete', this.startIntro, this);
-    // Restaurado el retraso para asegurar que React está montado y listo para escuchar.
+    // Restaurado el retraso para asegurar que React está listo.
     this.time.delayedCall(400, () => this.startIntro());
 
     this.scale.on('resize', this.onResize, this);
@@ -64,6 +64,7 @@ export class HubScene extends Phaser.Scene {
   }
 
   private startIntro = (): void => {
+    // CORREGIDO: Doble comprobación para evitar que se dispare dos veces (por lead-capture y por delayedCall)
     if (this.introPlayed) return;
     this.introPlayed = true;
     EventBus.emit('start-hub-intro');
