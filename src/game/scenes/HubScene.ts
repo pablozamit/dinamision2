@@ -64,7 +64,6 @@ export class HubScene extends Phaser.Scene {
   }
 
   private startIntro = (): void => {
-    // CORREGIDO: Doble comprobación para evitar que se dispare dos veces (por lead-capture y por delayedCall)
     if (this.introPlayed) return;
     this.introPlayed = true;
     EventBus.emit('start-hub-intro');
@@ -139,6 +138,12 @@ export class HubScene extends Phaser.Scene {
   }
 
   private createPortals(): void {
+    const zones = getSafeZones(this.scale);
+    // CORREGIDO: Si es móvil, NO renderizamos portales en Phaser. React se encarga.
+    if (zones.isMobile) {
+      return; 
+    }
+
     const positions = getHubPortalPositions(this.playBounds);
     this.portals = PILLAR_ORDER.map((id, index) => {
       const portal = Portal.fromPillar(this, positions[index].x, positions[index].y, id, false, index * 70);
@@ -152,10 +157,13 @@ export class HubScene extends Phaser.Scene {
   private onResize = (): void => {
     const zones = getSafeZones(this.scale);
     this.playBounds = zones.playArea;
-    const positions = getHubPortalPositions(this.playBounds);
-    this.portals.forEach((portal, i) => {
-      portal.container.setPosition(positions[i].x, positions[i].y);
-    });
+    
+    if (!zones.isMobile && this.portals.length > 0) {
+      const positions = getHubPortalPositions(this.playBounds);
+      this.portals.forEach((portal, i) => {
+        portal.container.setPosition(positions[i].x, positions[i].y);
+      });
+    }
   };
 
   private handlePortalClick(pillarId: PillarId): void {
