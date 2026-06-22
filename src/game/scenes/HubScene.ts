@@ -64,6 +64,7 @@ export class HubScene extends Phaser.Scene {
   }
 
   private startIntro = (): void => {
+    // CORREGIDO: Doble comprobación para evitar que se dispare dos veces.
     if (this.introPlayed) return;
     this.introPlayed = true;
     EventBus.emit('start-hub-intro');
