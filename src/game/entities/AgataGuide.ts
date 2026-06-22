@@ -162,7 +162,8 @@ export class AgataGuide {
     this.root.setScale(pos.scale);
     this.sprite.setPosition(0, 0);
 
-    // Aura perfectamente centrada usando la escala real del sprite.
+    // CORREGIDO: Cálculo del aura blindado. Usa la altura visible real del sprite
+    // y la sitúa en el centro superior para que NUNCA se corte por el borde inferior.
     const auraRadiusFactor = this.zones.isMobile ? 0.35 : 0.4;
     this.aura.setPosition(0, -this.sprite.displayHeight * 0.55);
     this.aura.setRadius(this.sprite.displayWidth * auraRadiusFactor);
