@@ -3,6 +3,7 @@ import PhaserGame, { type IRefPhaserGame } from './components/PhaserGame';
 import MissionIntro from './components/MissionIntro';
 import FinalScreen from './components/FinalScreen';
 import AgataDialogueOverlay from './components/AgataDialogueOverlay';
+import MobilePortalsOverlay from './components/MobilePortalsOverlay';
 
 import { EventBus } from './game/EventBus';
 import { loadProgress, saveProgress, type GameProgress } from './game/utils/storage';
@@ -78,9 +79,12 @@ export default function App() {
 
     const onSceneReady = (scene: Phaser.Scene): void => {
       const key = scene.scene.key;
+      // CORREGIDO: Forzamos la re-lectura del localStorage para sincronizar React y Phaser.
+      const stored = loadProgress();
+      if (stored) setProgress(stored);
+
       if (key === 'HubScene') {
         setCurrentPillar(null);
-        const stored = loadProgress();
         if (stored && stored.pillarsCompleted.length >= 4) {
           setPhase('final');
         } else {
@@ -134,6 +138,15 @@ export default function App() {
         <div className="fi-game-stage">
           <PhaserGame ref={gameRef} />
           <AgataDialogueOverlay />
+          {/* CORREGIDO: Overlay responsivo activado en el Hub para que los portales no se solapen en móvil */}
+          {phase === 'hub' && (
+            <MobilePortalsOverlay 
+              pillarsCompleted={progress?.pillarsCompleted ?? []} 
+              onPortalClick={(pillarId) => {
+                EventBus.emit('portal-entered', pillarId);
+              }}
+            />
+          )}
         </div>
       )}
 
